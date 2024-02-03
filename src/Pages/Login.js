@@ -4,7 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Row, Container, Button, Dropdown, Form} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faBars  } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate  } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const togglePasswordVisibility = () => {
   const passwordInput = document.getElementById('formBasicPassword');
@@ -14,6 +15,9 @@ const togglePasswordVisibility = () => {
     passwordInput.type = 'password';
   }
 };
+
+
+
 
 function Login() {
   return (
@@ -57,14 +61,18 @@ function Login() {
                   <Form.Label>Regisztráció</Form.Label>
                 </Form.Group>
                 <div style={{display: 'flex', flexDirection: 'column'}}>
-                  <Button variant="success" type="submit" style={{marginBottom: '20px'}}>
-                    Bejelentkezés
-                  </Button>
+                <div>
+                  <Link to="/Home">
+                    <button style={{backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: '10px', marginTop: '15px'}}>Bejelentkezés</button>
+                  </Link>
+                </div>
                   
-                  <Button variant="secondary" type="submit" >
-                    Vissza a Főoldalra
-                  </Button>
-                  
+                <div>
+                  <Link to="/Home">
+                    <button style={{backgroundColor: 'grey', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px'}}>Vissza a főoldalra</button>
+                  </Link>
+                </div>
+
                 </div>
               </Form>
 
