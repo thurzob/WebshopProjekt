@@ -1,0 +1,26 @@
+
+
+.navbar .dropdown-menu .dropdown-item:hover {
+  background-color: rgb(15, 105, 83);
+}
+.nav-link:hover {
+  font-weight: bold; /* Vastagabb szöveg */
+}
+
+.nav-link:hover {
+  background-color: rgb(15, 105, 83); /* Sárga háttérszín */
+  border-radius: 5px; /* 5px-es szögletesítés */
+}
+
+.nav-link:hover {
+  color: rgb(0, 132, 255); /* Vörös szöveg */
+}
+
+.dropdown-item a {
+  text-decoration: none; /* Az aláhúzás eltávolítása */
+}
+
+.dropdown-toggle{
+  position: absolute;
+  margin-left: 1621px;
+}
