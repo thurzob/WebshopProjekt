@@ -3,9 +3,8 @@ import './Login.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Row, Container, Button, Dropdown, Form} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faBars  } from '@fortawesome/free-solid-svg-icons';
-import { Link, Navigate, useNavigate  } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
+import { faEye, faBars} from '@fortawesome/free-solid-svg-icons';
+import { Link} from 'react-router-dom';
 
 const togglePasswordVisibility = () => {
   const passwordInput = document.getElementById('formBasicPassword');
@@ -19,9 +18,10 @@ const togglePasswordVisibility = () => {
 
 
 
-function Login() {
+function Login() 
+{
   return (
-    <div className='login-body'>
+    <div>
       <Container>   
             <Dropdown>
             <Dropdown.Toggle>
@@ -43,7 +43,7 @@ function Login() {
         <Row className="justify-content-center" style={{minHeight: '50vh', width: '50vh', margin:'0 auto'}}>
           
             <div className="login-form">
-              <h3>Bejelentkezés</h3>
+              <h3 style={{textDecoration: 'underline', fontWeight: 'bold'}}>Bejelentkezés</h3>
               <Form>
                 <Form.Group controlId="formBasicEmail" style={{marginBottom: '30px'}}>
                   <Form.Label style={{marginBottom: '10px'}}>Email cím</Form.Label>
@@ -56,14 +56,18 @@ function Login() {
                   <Form.Text className="text-muted">
                   <FontAwesomeIcon style={{marginLeft: '95%', marginTop: '0%'}} icon={faEye} onClick={togglePasswordVisibility}/>
                   </Form.Text>
-                  <Form.Label style={{marginRight: '30%'}}>Elfelejtette a jelszavát?</Form.Label>
-                  
-                  <Form.Label>Regisztráció</Form.Label>
+                  <Link to="" style={{marginRight: '200px'}}>
+                  Elfelejtette a jelszavát? 
+                  </Link>
+                  <Link to="/Registration">
+                  Regisztráció
+                  </Link>
                 </Form.Group>
+
                 <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div>
                   <Link to="/Home">
-                    <button style={{backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: '10px', marginTop: '15px'}}>Bejelentkezés</button>
+                    <button style={{backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: '15px', marginTop: '15px'}}>Bejelentkezés</button>
                   </Link>
                 </div>
                   
