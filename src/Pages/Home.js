@@ -39,7 +39,7 @@ function Home()
                     <Link className="nav-link navbar-brand text-center" to="/" style={{marginLeft: '1400px', fontSize: '25px' }}>Főoldal</Link>
                 </li>
                 <li className="nav-item">
-                    <a className="nav-link navbar-brand text-center" href='#' target='_self' style={{ marginLeft: '100px', fontSize: '25px' }}>Termékek</a>
+                   <Link className="nav-link navbar-brand text-center" to="/Products" href='#' target='_self' style={{ marginLeft: '100px', fontSize: '25px' }}>Termékek</Link> 
                 </li>
                 <li className="nav-item">
                     <a className="nav-link navbar-brand text-center" href='#' target='_self' style={{ marginLeft: '100px', fontSize: '25px' }}>Kapcsolat</a>

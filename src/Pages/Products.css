@@ -1,0 +1,17 @@
+.products-form {
+    background-color: rgba(5, 163, 255, 0.4); /* átlátszó háttér */
+    border-radius: 50px;
+    backdrop-filter: blur(10px); /* elhomályosítás */
+    height: 1000px;
+    width: 90%;
+    position: absolute;
+    margin-left: 5%;
+    margin-top: 3%;
+  
+}
+
+.Container {
+    margin-left:50px;
+    
+    
+}
