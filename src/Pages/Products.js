@@ -14,7 +14,7 @@ function Products() {
         setSelectedProductId(selectedProduct);
       
 
-        fetch(`https://localhost:7276/api/Merchant/${selectedProduct}`, {
+        fetch(`https://localhost:7276/api/Product/${selectedProduct}`, {
     method: 'GET',
     mode: 'cors',
     headers: {
@@ -30,15 +30,14 @@ function Products() {
     })
     .then(data => {
         console.log(data);
-        const mappedData = data.map(item => ({
-            merchants: item.merchant.map(merchant => ({
-                type: merchant.type,
-                serialName: merchant.serialName,
-                price: merchant.price
-            }))
-            
-        }))
-        setMappedData(mappedData);
+        const mappedData = {
+            products: [{
+                type: data.type,
+                serialName: data.serialName,
+                price: data.price
+            }]
+        };
+        setMappedData([mappedData]);
     })
     
     .catch(error => {
@@ -80,9 +79,9 @@ function Products() {
                     <select style={{ marginLeft: '90px' }} onChange={(e) => handleProductSelect(e.target.value)}>
                         <option>Válassz egy Terméket</option>
                         <optgroup label="HUNTER">
-                            <option value="1">HUNTER NODE-BT</option>
+                            <option value="2">HUNTER NODE-BT</option>
 
-                            <option value="2">HUNTER X-CORE</option>
+                            <option value="3">HUNTER X-CORE</option>
                            
 
                         </optgroup>
@@ -104,26 +103,26 @@ function Products() {
             <tbody>
             {mappedData.length > 0 && mappedData.map((item, index) => (
                 <React.Fragment key={index}>
-                    {item.merchants.map((merchant, idx) => (
+                    {item.products.map((product, idx) => (
                         <tr key={idx}>
                             <tr>
-                            <td style={{fontSize: '25px', fontWeight: 'bold'}}>Termék típusa: {merchant.type}</td>
+                            <td style={{fontSize: '25px', fontWeight: 'bold'}}>Termék típusa: {product.type}</td>
                             </tr>
                             <tr>
-                            <td  style={{fontSize: '20px', fontWeight: 'bold'}}>Széria név: {merchant.serialName}</td>
+                            <td style={{fontSize: '20px', fontWeight: 'bold'}}>Széria név: {product.serialName}</td>
                             </tr>
                             <tr>
-                            <td style={{fontSize: '20px', fontWeight: 'bold', textDecoration: 'underline'}}>Ár: {merchant.price} Ft.</td>
+                            <td style={{fontSize: '20px', fontWeight: 'bold', textDecoration: 'underline'}}>Ár: {product.price} Ft.</td>
                             </tr>
                         </tr>
                     ))}
                 </React.Fragment>
             ))}
-            {selectedProductId === '1' && (
+            {selectedProductId === '2' && (
                 <img style={{marginLeft: '0%'}} src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' />
                 
             )}
-            {selectedProductId === '2' && (
+            {selectedProductId === '3' && (
                 <img style={{marginLeft: '0%'}} src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='X-CORE' />
                 
             )}
