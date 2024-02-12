@@ -20,7 +20,7 @@ namespace Bakcend.Controllers
                 SerialName = createMerchantDto.SerialName,
                 Type = createMerchantDto.Type,
                 Price = createMerchantDto.Price,
-                QuantityId = createMerchantDto.QuantityId,  
+                UserId = createMerchantDto.UserId,  
                
             };
 
@@ -54,7 +54,7 @@ namespace Bakcend.Controllers
 
                 if (result.Count != 0)
                 {
-                    return StatusCode(200, result);
+                    return Ok( result);
                 }
 
                 if (merchant == null)
@@ -62,7 +62,7 @@ namespace Bakcend.Controllers
                     return NotFound();
                 }
 
-                return StatusCode(200, merchant);
+                return Ok(merchant);
 
 
             }
@@ -83,7 +83,7 @@ namespace Bakcend.Controllers
 
                 if (result.Count != 0)
                 {
-                    return StatusCode(200, result);
+                    return Ok(result);
                 }
 
                 if (merchant == null)
@@ -91,7 +91,7 @@ namespace Bakcend.Controllers
                     return NotFound();
                 }
 
-                return StatusCode(200, merchant);
+                return Ok(merchant);
 
 
             }

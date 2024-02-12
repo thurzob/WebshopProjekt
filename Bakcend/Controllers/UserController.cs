@@ -23,7 +23,7 @@ namespace Bakcend.Controllers
                 Email = createUserDto.Email,
                 PhoneNumber = createUserDto.PhoneNumber,
                 Date = createUserDto.Date,
-                MerchantId = createUserDto.MerchantId,
+                
                 
             };
 

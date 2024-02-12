@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Reflection.Metadata;
 
 namespace Bakcend.Models;
 
@@ -19,7 +17,5 @@ public partial class User
 
     public DateOnly? Date { get; set; }
 
-    public int MerchantId { get; set; }
-
-    public virtual Merchant Merchant { get; set; } = null!;
+    public virtual ICollection<Merchant> Merchant { get; set; } = new List<Merchant>();
 }

@@ -20,6 +20,8 @@ public partial class WebshopContext : DbContext
 
     public virtual DbSet<Order> Orders { get; set; }
 
+    public virtual DbSet<Product> Products { get; set; }
+
     public virtual DbSet<Quantity> Quantities { get; set; }
 
     public virtual DbSet<Storage> Storages { get; set; }
@@ -42,17 +44,17 @@ public partial class WebshopContext : DbContext
 
             entity.ToTable("merchant");
 
-            entity.HasIndex(e => e.QuantityId, "QuantityId");
+            entity.HasIndex(e => e.UserId, "UserId");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Price).HasColumnType("int(50)");
-            entity.Property(e => e.QuantityId).HasColumnType("int(100)");
             entity.Property(e => e.SerialName).HasMaxLength(200);
             entity.Property(e => e.Type).HasMaxLength(200);
+            entity.Property(e => e.UserId).HasColumnType("int(11)");
 
-            entity.HasOne(d => d.Quantity).WithMany(p => p.Merchant)
-                .HasForeignKey(d => d.QuantityId)
-                .HasConstraintName("merchant_ibfk_2");
+            entity.HasOne(d => d.User).WithMany(p => p.Merchant)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("merchant_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -65,16 +67,35 @@ public partial class WebshopContext : DbContext
             entity.Property(e => e.Orders).HasColumnType("int(20)");
         });
 
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("product");
+
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.Price).HasColumnType("int(100)");
+            entity.Property(e => e.SerialName).HasMaxLength(200);
+            entity.Property(e => e.Type).HasMaxLength(200);
+        });
+
         modelBuilder.Entity<Quantity>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.ToTable("quantity");
 
+            entity.HasIndex(e => e.MerchantId, "MerchantId");
+
             entity.Property(e => e.Id).HasColumnType("int(100)");
+            entity.Property(e => e.MerchantId).HasColumnType("int(11)");
             entity.Property(e => e.QuantityPurchased)
                 .HasColumnType("int(100)")
                 .HasColumnName("quantityPurchased");
+
+            entity.HasOne(d => d.Merchant).WithMany(p => p.Quantity)
+                .HasForeignKey(d => d.MerchantId)
+                .HasConstraintName("quantity_ibfk_1");
         });
 
         modelBuilder.Entity<Storage>(entity =>
@@ -94,18 +115,11 @@ public partial class WebshopContext : DbContext
 
             entity.ToTable("user");
 
-            entity.HasIndex(e => e.MerchantId, "MerchantsId");
-
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Email).HasMaxLength(200);
-            entity.Property(e => e.MerchantId).HasColumnType("int(11)");
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Password).HasMaxLength(200);
-            entity.Property(e => e.PhoneNumber).HasColumnType("int(11)");
-
-            entity.HasOne(d => d.Merchant).WithMany(p => p.User)
-                .HasForeignKey(d => d.MerchantId)
-                .HasConstraintName("user_ibfk_1");
+            entity.Property(e => e.PhoneNumber).HasColumnType("int(20)");
         });
 
         OnModelCreatingPartial(modelBuilder);

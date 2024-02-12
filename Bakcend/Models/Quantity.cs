@@ -9,5 +9,7 @@ public partial class Quantity
 
     public int QuantityPurchased { get; set; }
 
-    public virtual ICollection<Merchant> Merchant { get; set; } = new List<Merchant>();
+    public int MerchantId { get; set; }
+
+    public virtual Merchant Merchant { get; set; } = null!;
 }
