@@ -34,6 +34,9 @@ function Login()
                 <Dropdown.Item> 
                     <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>
                 </Dropdown.Item>
+                <Dropdown.Item> 
+                    <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>
+                </Dropdown.Item>
             </Dropdown.Menu>
             </Dropdown>
         </Container> 

@@ -10,3 +10,14 @@
   
 }
 
+.hover{
+    color: black;
+    padding: 0;
+    
+}
+
+.hover:hover{
+    color: rgb(136, 215, 136);
+    border: none;
+
+}

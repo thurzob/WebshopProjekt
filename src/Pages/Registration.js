@@ -45,14 +45,14 @@ function Registration()
           </Dropdown.Toggle>
           <Dropdown.Menu>
             <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Login">
-                Bejelentkezés
-              </Link>
+              <Link className="nav-link navbar-brand text-center" to="/Login">Bejelentkezés</Link>
+                
             </Dropdown.Item>
             <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Registration">
-                Regisztráció
-              </Link>
+              <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>          
+            </Dropdown.Item>
+            <Dropdown.Item>
+              <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>          
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
