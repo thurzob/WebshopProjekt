@@ -37,7 +37,7 @@ namespace Bakcend.Controllers
                 {
                     context.Add(user);
                     context.SaveChanges();
-                    return StatusCode(201, "Sikeres hozzáadás");
+                    return Ok(user);
                 }
 
             }
