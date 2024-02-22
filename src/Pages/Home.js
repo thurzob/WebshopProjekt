@@ -6,6 +6,7 @@ import { Container, Dropdown } from 'react-bootstrap';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import 'normalize.css';
 
 
 
@@ -39,7 +40,7 @@ function Home()
             <div className="collapse navbar-collapse" id="navbarNav">
                 <ul className="navbar-nav">
                 <li className="nav-item active">
-                    <Link className="nav-link navbar-brand text-center" to="/" style={{marginLeft: '1400px', fontSize: '25px' }}>Főoldal</Link>
+                    <Link className="nav-link navbar-brand text-center" to="/" style={{marginLeft: '1300px', fontSize: '25px' }}>Főoldal</Link>
                 </li>
                 <li className="nav-item">
                    <Link className="nav-link navbar-brand text-center" to="/Products" style={{ marginLeft: '100px', fontSize: '25px' }}>Termékek</Link> 

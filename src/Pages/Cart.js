@@ -15,7 +15,8 @@ function Cart() {
     const [selectedProductId, setSelectedProductId] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedItems, setSelectedItems] = useState([]);
-   
+    const [scrolledToBottom, setScrolledToBottom] = useState(false); // Állapot az oldal aljára görgetés ellenőrzésére
+
 
     useEffect(() => {
         if (!selectedProductId || selectedProductId === '') {
@@ -70,12 +71,12 @@ function Cart() {
     };
 
 
+    
     const scrollToOrder = () => {
-        // Megkeressük az alábbi rendelés fület tartalmazó konténert
         const orderContainer = document.getElementById('orderContainer');
-
-        // Görgetünk az orderContainerhez
-        orderContainer.scrollIntoView({ behavior: 'smooth' });
+        if (orderContainer) {
+            orderContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     const handleToggleItem = (item) => {
@@ -95,12 +96,31 @@ function Cart() {
         // Kiürítjük a kijelölt elemek listáját
         setSelectedItems([]);
     };
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                // Ha az oldal aljára görgetünk
+                setScrolledToBottom(true);
+            } else {
+                // Ha nem az oldal alján vagyunk
+                setScrolledToBottom(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
     
     
     return (
 
+        <div id="bottomOfPage">
         <div>
-            <Container style={{ marginLeft: '363px' }}>
+            <Container style={{ marginLeft: '300px' }}>
                 <Dropdown>
                     <Dropdown.Toggle>
                         <FontAwesomeIcon icon={faBars} size='2x' />
@@ -119,12 +139,18 @@ function Cart() {
                 </Dropdown>
             </Container>
 
-            <div className="products-form "  style={{ borderLeft: '5px solid black', height: '100vh', overflowY: 'auto'  }}>
+            <div className="products-form "  style={{ borderLeft: '5px solid black', overflowY: 'auto' }}>
                 <div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                    <Link to="/Products"><h3 className="hover" style={{ marginLeft: '135px', marginTop: '20px', textDecoration: 'underline', border: 'none' }}>Termékek</h3></Link>
-                    <Link to="/Cart"><h3 className="hover" style={{ marginLeft: '250px', marginTop: '12px', textDecoration: 'underline', fontSize: '36px' }}>Kosár</h3></Link>
-                    <Link to="/Home"><h3 className="hover" style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline',  }}>Főoldal</h3></Link>
+                    <h3  style={{ marginLeft: '120px', marginTop: '20px', textDecoration: 'underline', border: 'none' }}>
+                        <Link className="hover" to="/Products">Termékek</Link>
+                    </h3>
+                    <h3  style={{ marginLeft: '250px', marginTop: '15px', textDecoration: 'underline' , fontSize: '36px' }}>
+                        <Link className="hover" to="/Cart">Kosár</Link>
+                    </h3>
+                    <h3  style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
+                        <Link className="hover" to="/Home">Főoldal</Link>
+                    </h3>
                 </div>
                     <hr style={{ color: 'black', border: 'none', borderTop: '5px solid', borderRadius: '100%' }} />
 
@@ -134,7 +160,7 @@ function Cart() {
             {/* Kosár tartalom */}
                     <div className="basket-container" style={{ height: '200vh', marginLeft: '5%' }}>
                     
-                        <div>
+                        <div >
                         <h2 style={{textDecoration: 'underline'}}>Kosár tartalma</h2>
                         {cartItems.length === 0 ? (
                             <p>A kosár üres</p>
@@ -171,70 +197,23 @@ function Cart() {
 
                         </div>
                         <button onClick={handleClearSelectedItems} style={{ marginTop: '20px' }}>Kijelöltek törlése</button>
-                        <button onClick={scrollToOrder}>Tovább a rendeléshez</button>
+                        <h3  style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
+                        <Link className="hover" to="/Order" style={{marginLeft: '25%'}}> Tovább a rendeléshez</Link>
+                    </h3>
                     </div>
 
-                    {/* Rendelés fül */}
-                    <div id="orderContainer" className="order-container" style={{ height: '200vh',  marginLeft: '5%'}}>
-                       <div className='bg-overlay'>
-                        <Container>
-                            <Row className="justify-content-center" style={{minHeight: '50vh', width: '50vh', margin:'0 auto'}}>
-                            
-                                
-                                <div className="cart-form">
-                                
-                                <h2 style={{paddingTop: '5%', textDecoration: 'underline'}}>Rendelés</h2>
-                                    <Form>
-                                        <Form.Group   controlId="formBasicEmail" style={{marginBottom: '30px', width: '46.5vh'}}>
-                                        <Form.Label style={{marginBottom: '10px'}}>Számlázási név</Form.Label>
-                                        <Form.Control type="name" placeholder="Add meg a számlázási nevet" />
-                                        </Form.Group>
-
-                                        <Form.Group controlId="formBasicPassword" style={{marginBottom: '30px', width: '46.5vh'}}>
-                                        <Form.Label>Számlázási cím</Form.Label>
-                                        <Form.Control type="address" placeholder="Add meg a számlázási címet"/>
-                                        </Form.Group>
-
-                                        <Form.Group controlId="formBasicPassword" style={{marginBottom: '30px', width: '46.5vh'}}>
-                                        <Form.Label>Email cím</Form.Label>
-                                        <Form.Control type="billing" placeholder="Add meg az email címed"/>
-                                        </Form.Group>
-                                        <Form.Label>Szállítási cím</Form.Label>
-                                        <Form.Group controlId="formBasicPassword" style={{marginBottom: '30px', display: 'flex'}}>                  
-                                        <Form.Control style={{marginRight : '2%', width: '15%'}} type="Address" placeholder="Irányítószám"/>
-                                        <Form.Control style={{ width: '100%'}} type="Address" placeholder="Utca, Házszám"/>
-                                        </Form.Group>
-
-                                        <Form.Group controlId="formBasicPassword" style={{marginBottom: '30px', width: '46.5vh'}}>
-                                        <Form.Label>Telefonszám</Form.Label>
-                                        <Form.Control type="phone" placeholder="Add meg a telefonszámot"/>
-                                        </Form.Group>
-
-                                        <button style={{backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px'}}>Megrendelés</button>
-
-                                    
-                                    </Form>
-
-                                </div>
-                            
-
-                            
-                            </Row>
-                        </Container>
-                        </div>
-                    </div>
-                </div>
+                   
                 
-                <div>
             
             
-        </div>
+                </div>
 
             </div>
 
             
                
 
+        </div>
         </div>
     );
 }

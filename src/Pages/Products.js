@@ -66,6 +66,8 @@ function Products() {
             });
     };
 
+
+
     const handleAddToCart = () => {
         if (selectedProductId && quantity > 0 && mappedData.length > 0) {
             const product = mappedData[0]?.products[0];
@@ -83,10 +85,14 @@ function Products() {
         }
     };
 
-    return (
+    
 
+    return (
+        
         <div>
-            <Container style={{ marginLeft: '363px' }}>
+            
+            <div id="bottomOfPage" style={{ height: '100vh', width: '100%', position: 'absolute', bottom: 0 }}></div>           
+            <Container style={{ marginLeft: '300px' }}>
                 <Dropdown>
                     <Dropdown.Toggle>
                         <FontAwesomeIcon icon={faBars} size='2x' />
@@ -108,9 +114,15 @@ function Products() {
             <div className="products-form" style={{ borderLeft: '5px solid black' }}>
                 <div style={{ borderLeft: '6px solid grey', height: '100%', position: 'absolute', left: '20%', borderRadius: '100%', top: '0%' }}></div>
                 <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                    <Link to="/Products"><h3 className="hover" style={{ marginLeft: '120px', marginTop: '15px', textDecoration: 'underline', border: 'none', fontSize: '36px' }}>Termékek</h3></Link>
-                    <Link to="/Cart"><h3 className="hover" style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>Kosár</h3></Link>
-                    <Link to="/Home"><h3 className="hover" style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>Főoldal</h3></Link>
+                    <h3  style={{ marginLeft: '120px', marginTop: '15px', textDecoration: 'underline', border: 'none', fontSize: '36px' }}>
+                        <Link className="hover" to="/Products">Termékek</Link>
+                    </h3>
+                    <h3  style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
+                        <Link className="hover" to="/Cart">Kosár</Link>
+                    </h3>
+                    <h3  style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
+                        <Link className="hover" to="/Home">Főoldal</Link>
+                    </h3>
                 </div>
                 <div>
                     <hr style={{ color: 'red', border: 'none', borderTop: '5px solid', borderRadius: '100%' }} />
@@ -129,7 +141,7 @@ function Products() {
 
                     </select>
 
-
+                    
                     <div>
 
 
@@ -169,7 +181,7 @@ function Products() {
 
                             </tbody>
                         </table>
-                        <div style={{ marginLeft: '452px', marginTop: '5%' }}>
+                        <div style={{ marginLeft: '420px', marginTop: '5%' }}>
                             {selectedProductId === '2' && (
                                 <div>
                                     <input
@@ -201,6 +213,7 @@ function Products() {
                 </div>
             </div>
         </div>
+        
     );
 }
 

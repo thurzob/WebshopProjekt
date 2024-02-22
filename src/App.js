@@ -7,7 +7,9 @@ import Home from './Pages/Home';
 import Registration from './Pages/Registration';
 import Products from './Pages/Products';  
 import Cart from './Pages/Cart';
+import Order from './Pages/Order';
 import { CartProvider } from './Pages/CartContext';
+import 'normalize.css';
 
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
           <Route path="/Home" element={<Home />} />
           <Route path="/Products" element={<Products />} />
           <Route path="/Cart" element={<Cart />} />
+          <Route path="/Order" element={<Order />} />
         </Routes>
         </CartProvider>
       </Router>

@@ -1,4 +1,5 @@
 body{
+    overflow: hidden;
     background-image: url('../public/Fokep.jpg');
     background-position: center;
     background-size: cover;
