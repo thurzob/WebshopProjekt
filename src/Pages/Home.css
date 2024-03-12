@@ -1,24 +1,69 @@
 .navbar .dropdown-menu .dropdown-item:hover {
   background-color: rgb(15, 105, 83);
+  right: 0;
 }
 .nav-link:hover {
   font-weight: bold; /* Vastagabb szöveg */
 }
 
 .nav-link:hover {
-  background-color: rgb(15, 105, 83); /* Sárga háttérszín */
+  background-color: rgb(105, 105, 105); /* Sárga háttérszín */
   border-radius: 5px; /* 5px-es szögletesítés */
 }
 
 .nav-link:hover {
-  color: rgb(0, 132, 255); /* Vörös szöveg */
+  color: rgb(33, 48, 62); /* Vörös szöveg */
 }
 
 .dropdown-item a {
-  text-decoration: none; /* Az aláhúzás eltávolítása */
+  text-decoration: none; 
+  
 }
 
-.dropdown-toggle{
-  position: absolute;
-  margin-left: 1542px;
+
+.navbar {
+  background-color: #333;
+  position: relative;
 }
+
+.dropdown-toggle {
+  position: relative;
+  margin-left: 119%;
+}
+
+.navbar-nav {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-item {
+  margin: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    background-color: rgb(103, 122, 129);
+    margin-top: 0;
+  }
+  .navbar-nav {
+    flex-direction: column;
+  }
+  .nav-item {
+    margin-bottom: 10px;
+  }
+}
+
+.my-custom-navbar {
+  background-color: rgba(27, 24, 22, 0.8) !important;
+  position: fixed; /* Rögzített pozíció */
+  top: 0; /* A lap tetején */
+  width: 100%; /* Teljes szélességű */
+  z-index: 1000;
+  
+}
+
+.basic-navbar-nav{
+  justify-content: end;
+}
+
+

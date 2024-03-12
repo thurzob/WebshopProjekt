@@ -1,8 +1,11 @@
-body{
-    overflow: hidden;
-    background-image: url('../public/Fokep.jpg');
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    height: 100vh;
+body {
+  background-image: url('../public/Fokep.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* A háttérkép minimális magassága a teljes képernyő magassága */
+  padding-bottom: 20px; /* A tartalom alatti üres terület */
+  
+  
 }
+

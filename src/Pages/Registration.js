@@ -1,28 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './Registration.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Row, Container, Button, Dropdown, Form} from 'react-bootstrap';
+import {Row, Container, Button, Dropdown, Form, Nav, Navbar, NavDropdown, NavbarBrand} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faBars} from '@fortawesome/free-solid-svg-icons';
 import { Link} from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import {  AuthContext } from './AuthContext';
+import styled from 'styled-components';
+
+const ResponsiveNavbar = styled.nav`
+    
+position: relative;
+top: 19%;
+width: 100%;
+
+@media (max-width: 992px) {
+  background-color: lightblue;
+  
+}
+`;
 
 
+
+const NavbarUl = styled.ul`
+display: flex;
+justify-content: space-between;
+text-align: right;  /* Szöveg jobbra igazítása */
+
+@media (max-width: 992px) {
+  flex-direction: column;
+}
+`;
+
+const NavbarLi = styled.li`
+margin-left: 1rem;
+
+@media (max-width: 992px) {
+  margin-left: 0;
+}
+`;
+
+const NavbarLink = styled(Link)`
+font-size: 1.2rem;
+
+@media (max-width: 992px) {
+  font-size: 1rem;
+}
+`;
+
+const ResponsiveContainer = styled(Container)`
+@media (max-width: 992px) {
+justify-content: center;
+display: flex;
+align-items: center;
+}
+`;
+
+const ResponsiveRow = styled(Row)`
+@media (max-width: 992px) {
+justify-content: center;
+}
+`;
 
 function Registration() 
 {
+
+  const { isLoggedIn, logout } = useContext(AuthContext);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
+    fullname: '',
     email: '',
     password: '',  
     phoneNumber: '', 
-    birthDate: null,
+    age: ''
+    
   });
   const [startDate, setStartDate] = useState(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [token, setToken] = useState('');
+  const [userId, setUserId] = useState(''); 
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -47,24 +107,72 @@ function Registration()
       passwordInput.type = 'password';
     }
   };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[0-9a-zA-Z!@#$%^&*()_+]{8,}$/;
+    return passwordRegex.test(password);
+  };
   
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+  
+    // Ellenőrizd a jelszó megfelelőségét
+    if (!validatePassword(formData.password)) {
+      setPasswordError('A jelszónak legalább 8 karakter hosszúnak kell lennie, és tartalmaznia kell legalább egy kisbetűt, egy nagybetűt, egy számot és egy speciális karaktert!');
+      return;
+    }
+  
+    // Definiáld és töltse fel az üres mezők tömbjét
+    const emptyFields = [];
+    for (const key in formData) {
+      if (formData[key].trim() === '') {
+        emptyFields.push(key);
+      }
+    }
+  
+    // Ellenőrizd a jelszavak egyezőségét
+    if (formData.password !== confirmPassword) {
+      setPasswordError('A két jelszó nem egyezik meg!');
+      return;
+    }
+  
+    // Ha vannak üres mezők, kiírjuk az üzenetet
+    if (emptyFields.length > 0) {
+      const emptyFieldsText = emptyFields.map(field => {
+        return field === 'username' ? 'Felhasználónév' :
+               field === 'fullname' ? 'Teljes név' :
+               field === 'email' ? 'Email' :
+               field === 'password' ? 'Jelszó' :
+               field === 'phoneNumber' ? 'Telefonszám' :
+               field === 'age' ? 'Kor' : '';
+      }).join(', ');
+  
+      alert(`A következő mező(k) nem lehet(nek) üres(ek): ${emptyFieldsText}`);
+      return;
+    }
+  
+    // További kód...
+  
+    // Ellenőrizd a jelszavak egyezőségét
     if (password !== confirmPassword) {
       setPasswordError('A két jelszó nem egyezik meg!');
       return;
     }
     
     const requestData = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      phoneNumber: formData.phoneNumber,
-      birthDate: formData.birthDate
+      UserName: formData.username,     
+      FullName: formData.fullname,
+      Name: formData.fullname,
+      Email: formData.email,
+      Password: formData.password,
+      PhoneNumber: formData.phoneNumber,
+      Age: formData.age
     }
 
-    fetch(`https://localhost:7276/api/User`, {
+   
+
+      fetch(`https://localhost:7276/auth/register`, {
       method: 'POST',
       mode: 'cors',
       headers: {
@@ -73,6 +181,7 @@ function Registration()
           // Egyéb szükséges fejlécek
       },
       body: JSON.stringify(requestData)
+      
   })
       .then(response => {
           if (!response.ok) {
@@ -82,6 +191,7 @@ function Registration()
       })
       .then(data => {
           console.log(data);
+          console.log(requestData)
           
       })
 
@@ -92,49 +202,75 @@ function Registration()
    
   };
   
+  const handleLogout = () =>{
+    logout();
+    setToken('');
+    setUserId('');
+    localStorage.removeItem('userId');
 
+  }
   
   return (
-    <div>
-      <Container>
-        <Dropdown>
-          <Dropdown.Toggle>
-            <FontAwesomeIcon icon={faBars} size="2x" />
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Login">Bejelentkezés</Link>
-                
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>          
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>          
-            </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+    <div >
+      <Navbar className='my-custom-navbar'  expand='lg'>
+      <Container style={{justifyContent: 'end'}}>
+        <Navbar.Toggle  aria-controls='basic-navbar-nav'/>        
+        <Navbar.Collapse id='basic-navbar-nav' className=' justify-content-end'>
+          <Nav.Link style={{color: 'bisque'}} as={Link} to='/'>
+            Főoldal
+          </Nav.Link>
+          <Nav>
+            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Products'>
+              Termékek
+            </Nav.Link>
+            <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
+            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Cart'>
+              Kosár
+            </Nav.Link>
+            {!isLoggedIn && (
+              <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Registration'>
+                Regisztráció
+              </NavbarBrand>
+            )}
+            {isLoggedIn ? (
+              <Nav.Link style={{color: 'bisque'}} as={Link} to='/Login' onClick={handleLogout}>
+                Kijelentkezés
+              </Nav.Link>
+            ) : (
+              <Nav.Link style={{color: 'bisque'}} as={Link} to='/Login'>
+                Bejelentkezés
+              </Nav.Link>
+            )}
+          </Nav>
+        </Navbar.Collapse>
+       
       </Container>
+    </Navbar>
 
-      <div className="bg-overlay">
-        <Container>
-          <Row className="justify-content-center" style={{ minHeight: '50vh', width: '50vh', margin: '0 auto' }}>
+      <div>
+        <ResponsiveContainer>
+          <ResponsiveRow className="justify-content-center" style={{ width: '50vh', margin: '0 auto', paddingTop: '83px' }}>
             <div className="registration-form">
               
               <h3 style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Regisztráció</h3>
 
               <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="formBasicName" style={{ marginBottom: '10px' }}>
-                  <Form.Label style={{ marginBottom: '10px' }}>Név</Form.Label>
-                  <Form.Control  onChange={handleInputChange} name='name' value={formData.name} type="text" placeholder="Add meg a neved" />
+                <Form.Group controlId="formBasicUserName" style={{ marginBottom: '5px' }}>
+                  <Form.Label style={{ marginBottom: '10px' }}>Felhasználónév</Form.Label>
+                  <Form.Control  onChange={handleInputChange} name='username' value={formData.username} type="text" placeholder="Felhasználónév" />
                 </Form.Group>
 
-                <Form.Group controlId="formBasicEmail" style={{ marginBottom: '10px' }}>
+                <Form.Group controlId="formBasicFullName" style={{ marginBottom: '5px' }}>
+                  <Form.Label style={{ marginBottom: '10px' }}>Teljes név</Form.Label>
+                  <Form.Control  onChange={handleInputChange} name='fullname' value={formData.fullname} type="text" placeholder="Teljes név" />
+                </Form.Group>
+
+                <Form.Group controlId="formBasicEmail" style={{ marginBottom: '5px' }}>
                   <Form.Label style={{ marginBottom: '5px' }}>Email</Form.Label>
-                  <Form.Control  onChange={handleInputChange} name='email' value={formData.email} type="email" placeholder="Add meg az email címed" />
+                  <Form.Control  onChange={handleInputChange} name='email' value={formData.email} type="email" placeholder="Email cím" />
                 </Form.Group>
 
-                <Form.Group controlId="formBasicPassword" style={{ marginBottom: '10px' }}>
+                <Form.Group controlId="formBasicPassword" style={{ marginBottom: '5px' }}>
                   <Form.Label>Jelszó</Form.Label>
                   <Form.Control
                     name='password'
@@ -184,25 +320,13 @@ function Registration()
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                   />
-        </div>
+                 </div>
                   
                 </Form.Group>
 
-                <Form.Group>
-                  <Form.Label>Születési dátum</Form.Label>
-                  <div style={{ marginBottom: '20px' }}>
-                  <Form.Control
-                    value={formData.birthDate}
-                    as={DatePicker}
-                    selected={startDate}
-                    onChange={(date) => {
-                      setStartDate(date); // Frissíti a startDate állapotot a kiválasztott dátummal
-                      handleInputChange({ target: { name: 'birthDate', value: date} });
-                    }}
-                    dateFormat="yyyy-MM-dd"
-                    placeholder="Válassz egy dátumot"
-                    />
-                  </div>
+                <Form.Group controlId="formBasicAge" style={{ marginBottom: '10px'  }}>
+                  <Form.Label style={{ marginBottom: '10px' }}>Kor</Form.Label>
+                  <Form.Control style={{width: '50px', marginRight: '15px', padding: '5px', backgroundColor: 'white', borderRadius: '5px', height: '38px' }}  onChange={handleInputChange} name='age' value={formData.age} type="text" placeholder="Kor" />
                 </Form.Group>
 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -243,11 +367,13 @@ function Registration()
                 </div>
               </Form>
             </div>
-          </Row>
-        </Container>
+          </ResponsiveRow>
+        </ResponsiveContainer>
       </div>
     </div>
   );
 }
+
+
 
 export default Registration;

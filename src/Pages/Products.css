@@ -1,23 +1,97 @@
-.products-form {
-    background-color: rgba(5, 163, 255, 0.4); /* átlátszó háttér */
-    border-radius: 50px;
-    backdrop-filter: blur(10px); /* elhomályosítás */
-    height: 1000px;
-    width: 90%;
-    position: absolute;
-    margin-left: 5%;
-    margin-top: 3%;
+.bg-overlay {
+  background-position: center;
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   
 }
 
-.hover{
-    color: black;
-    padding: 0;
-    
+.products-form {
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 20px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  margin-top: 75px;
+  width: 100%;
+  min-height: 800px;
 }
 
-.hover:hover{
-    color: rgb(136, 215, 136);
-    border: none;
+.ProductContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Középre igazítás */
+  align-items: center; /* Középre igazítás */
+  text-align: left; /* Balra igazítás */
+}
 
+@media (min-width: 992px) {
+  .ProductContent {
+      flex-direction: row;
+      justify-content: space-between; /* Közötti távolság a kép és a tartalom között */
+      align-items: center; /* Középre igazítás */
+      text-align: left; /* Balra igazítás */
+  }
+}
+
+.ProductContent img {
+  max-width: 300px; /* Maximum szélesség a képeknek */
+  align-self: flex-end; /* Jobbra igazítás */
+  margin-left: auto; /* Balról nyúlik ki */
+}
+
+@media (max-width: 992px) {
+  .products-form {
+    max-width: 90%;
+    margin: 0 auto;
+    min-height: 800px;
+    margin-top: 75px;
+  }
+}
+  
+  
+.navbar {
+  background-color: #333;
+  position: relative;
+}
+
+.dropdown-toggle {
+  position: relative;
+  margin-left: 119%;
+}
+
+.navbar-nav {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-item {
+  margin: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    background-color: lightblue;
+    margin-top: 0;
+  }
+  .navbar-nav {
+    flex-direction: column;
+  }
+  .nav-item {
+    margin-bottom: 10px;
+  }
+}
+
+.my-custom-navbar {
+  background-color: rgba(27, 24, 22, 0.8) !important;
+  position: fixed; /* Rögzített pozíció */
+  top: 0; /* A lap tetején */
+  width: 100%; /* Teljes szélességű */
+  z-index: 1000;
+  
+}
+
+.basic-navbar-nav{
+  justify-content: end;
 }

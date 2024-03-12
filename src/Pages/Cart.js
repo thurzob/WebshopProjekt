@@ -6,16 +6,31 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faBars} from '@fortawesome/free-solid-svg-icons';
 import { Link} from 'react-router-dom';
 import { CartContext } from './CartContext';
+import { useAuth } from './AuthContext';
 
 
 
 function Cart() {
-    const { cartItems, clearCart } = useContext(CartContext);
+    
+    const { cartItems,setCartItems, clearCart } = useContext(CartContext);
     const [mappedData, setMappedData] = useState([]);
     const [selectedProductId, setSelectedProductId] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedItems, setSelectedItems] = useState([]);
-    const [scrolledToBottom, setScrolledToBottom] = useState(false); // Állapot az oldal aljára görgetés ellenőrzésére
+    const [scrolledToBottom, setScrolledToBottom] = useState(false);
+    const { isLoggedIn,setIsLoggedIn, logout } = useAuth();
+    const [token, setToken] = useState('');
+    const [userId, setUserId] = useState(''); 
+    // Állapot az oldal aljára görgetés ellenőrzésére
+
+    useEffect(() => {
+        // Betöltéskor ellenőrizd, hogy van-e tárolt autentikációs állapot a localStorage-ban
+        const storedUserId = localStorage.getItem('userId');
+        if (storedUserId) {
+            setIsLoggedIn(true);
+            setUserId(storedUserId);
+        }
+    }, []);
 
 
     useEffect(() => {
@@ -90,9 +105,9 @@ function Cart() {
     
     const handleClearSelectedItems = () => {
         // Kijelölt elemek törlése a kosárból
-        const updatedCartItems = cartItems.filter(item => !selectedItems.find(selectedItem => selectedItem === item));
+        const updatedCartItems = cartItems.filter(item => !selectedItems.includes(item));
         // Kosár frissítése a kijelölt elemek nélkül
-        clearCart(updatedCartItems);
+        setCartItems(updatedCartItems);
         // Kiürítjük a kijelölt elemek listáját
         setSelectedItems([]);
     };
@@ -115,6 +130,13 @@ function Cart() {
         };
     }, []);
     
+    const handleLogout = () =>{
+        logout();
+        setToken('');
+        setUserId('');
+        localStorage.removeItem('userId');
+    
+      }
     
     return (
 
@@ -126,15 +148,19 @@ function Cart() {
                         <FontAwesomeIcon icon={faBars} size='2x' />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                        <Dropdown.Item>
+                    <Dropdown.Item>
+                        {isLoggedIn ? (
+                            <Link className="nav-link navbar-brand text-center" onClick={handleLogout} to="/Home">Kijelentkezés</Link>
+                        ) : (
                             <Link className="nav-link navbar-brand text-center" to="/Login">Bejelentkezés</Link>
+                        )}
                         </Dropdown.Item>
                         <Dropdown.Item>
-                            <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>
+                        <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>          
                         </Dropdown.Item>
                         <Dropdown.Item>
-                            <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>
-                        </Dropdown.Item>
+                        <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>          
+                        </Dropdown.Item>   
                     </Dropdown.Menu>
                 </Dropdown>
             </Container>
@@ -166,16 +192,31 @@ function Cart() {
                             <p>A kosár üres</p>
                         ) : (
                             <div>
-                            {cartItems.map((item, index) => (
+                            {cartItems && cartItems.length > 0 && cartItems.map((item, index) => (
                                 <div key={index} style={{ display: 'table-row', marginBottom: '10px' }}>                                    
                                 <div style={{ display: 'table-cell', backgroundColor: 'lightblue', border: '2px solid black', padding: '10px', width: '25%', marginRight: '5px', borderRadius: '15%' }}>     
                                     <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>Mennyiség:</p>
                                     <p>{item.quantity} db</p>
                                     <input
+                                        type="number"
+                                        value={item.quantity}
+                                        onChange={(e) => {
+                                            const newQuantity = parseInt(e.target.value);
+                                            if (!isNaN(newQuantity) && newQuantity > 0) {
+                                                const updatedCartItems = [...cartItems];
+                                                updatedCartItems[index].quantity = newQuantity;
+                                                setCartItems(updatedCartItems);
+                                            }
+                                        }}
+                                        style={{ width: '50px' }}
+                                    />
+                                    <input
                                         type="checkbox"
                                         checked={selectedItems.includes(item)}
                                         onChange={() => handleToggleItem(item)}
                                     />
+
+                                    
                                     </div >
                                     <div style={{ display: 'table-cell', backgroundColor: 'lightblue', border: '2px solid black', padding: '10px', width: '25%', marginRight: '5px', borderRadius: '15%' }}>
                                         <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>Ára:</p>
@@ -197,9 +238,21 @@ function Cart() {
 
                         </div>
                         <button onClick={handleClearSelectedItems} style={{ marginTop: '20px' }}>Kijelöltek törlése</button>
-                        <h3  style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
-                        <Link className="hover" to="/Order" style={{marginLeft: '25%'}}> Tovább a rendeléshez</Link>
-                    </h3>
+                        
+                        
+                        {!isLoggedIn && (
+                        <h3 style={{ marginLeft: '400px', marginTop: '20px', color: 'black'  }}>
+                           A rendeléshez <Link className="hover" to="/Login" style={{textDecoration: 'underline'}} >jelentkezzen</Link> be vagy ha még nincs fiókja <Link className="hover" to="/Registration" style={{textDecoration: 'underline'}}>regisztráljon</Link>
+                        </h3>
+
+                        
+                        )}
+                        {isLoggedIn && (
+                        <h3 style={{ marginLeft: '250px', marginTop: '20px', textDecoration: 'underline' }}>
+                            <Link className="hover" to="/Order" style={{ marginLeft: '25%' }}>Tovább a rendeléshez</Link>
+                        </h3>
+)}
+                    
                     </div>
 
                    
