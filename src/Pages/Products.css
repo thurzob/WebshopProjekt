@@ -18,28 +18,7 @@
   min-height: 800px;
 }
 
-.ProductContent {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Középre igazítás */
-  align-items: center; /* Középre igazítás */
-  text-align: left; /* Balra igazítás */
-}
 
-@media (min-width: 992px) {
-  .ProductContent {
-      flex-direction: row;
-      justify-content: space-between; /* Közötti távolság a kép és a tartalom között */
-      align-items: center; /* Középre igazítás */
-      text-align: left; /* Balra igazítás */
-  }
-}
-
-.ProductContent img {
-  max-width: 300px; /* Maximum szélesség a képeknek */
-  align-self: flex-end; /* Jobbra igazítás */
-  margin-left: auto; /* Balról nyúlik ki */
-}
 
 @media (max-width: 992px) {
   .products-form {
