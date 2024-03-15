@@ -10,10 +10,10 @@
 
 .products-form {
   background-color: rgba(255, 255, 255, 0.4);
-  padding: 20px;
+ 
   border-radius: 50px;
   backdrop-filter: blur(10px);
-  margin-top: 75px;
+  margin-top: 160px;
   width: 100%;
   min-height: 800px;
 }
@@ -51,7 +51,7 @@
 
 @media (max-width: 768px) {
   .navbar {
-    background-color: lightblue;
+    
     margin-top: 0;
   }
   .navbar-nav {
@@ -74,3 +74,4 @@
 .basic-navbar-nav{
   justify-content: end;
 }
+
