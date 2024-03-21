@@ -8,17 +8,14 @@ import Registration from './Pages/Registration';
 import Products from './Pages/Products';  
 import Cart from './Pages/Cart';
 import Order from './Pages/Order';
-import { CartProvider } from './Pages/CartContext';
-import { AuthProvider, useAuth } from './Pages/AuthContext';
-import 'normalize.css';
+import Admin from './Pages/Admin';
+import { useAuth } from './Pages/AuthContext';
 
 
 function App() {
 
+  
   return (
-    <Router>
-      <CartProvider>
-        <AuthProvider>
           <Routes>          
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
@@ -26,18 +23,39 @@ function App() {
             <Route path="/Home" element={<Home />} />
             <Route path="/Products" element={<Products />} />
             <Route path="/Cart" element={<Cart />} />
-            <Route path='/Order' element={<PrivateRoute><Order/></PrivateRoute>}/>           
+            <Route path='/Order' element={<PrivateRoute><Order/></PrivateRoute>}/>   
+            <Route path='/Admin' element={<PrivateAdminRoute><Admin/></PrivateAdminRoute>}/>          
           </Routes>
-        </AuthProvider>
-      </CartProvider>
-    </Router>
+        
+    
   );
 }
 
-function PrivateRoute({ children, ...props }) {
-  const userId = localStorage.getItem('userId');
+function PrivateRoute({ children }) {
   const { isLoggedIn } = useAuth();
-  
-  return userId ? children : <Navigate to="/Login" replace />;
+
+  // Ellenőrizzük, hogy be van-e jelentkezve a felhasználó
+  if (!isLoggedIn) {
+    // Ha a felhasználó nincs bejelentkezve, átirányítjuk a felhasználót a bejelentkezési oldalra
+    return <Navigate to="/Login" replace />;
+  }
+
+  // Minden feltétel teljesülése esetén megjelenítjük a gyermek komponenst
+  return children;
 }
+
+function PrivateAdminRoute({ children }) {
+  const { isLoggedIn} = useAuth();
+  const roles = localStorage.getItem('role');
+  
+  if ((!isLoggedIn || !roles.includes('ADMIN'))) {
+    
+    return <Navigate to="/" replace />;
+  }
+
+  // Minden feltétel teljesülése esetén megjelenítjük a gyermek komponenst
+  return children;
+}
+
+
 export default App;

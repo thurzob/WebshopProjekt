@@ -10,26 +10,32 @@ import {  AuthContext } from './AuthContext';
 import styled from 'styled-components';
 
 const ProductContent = styled.div`
-  display: grid;
   
   gap: 20px;
-  align-items: flex-start;
   text-align: left;
   margin-left: 20%;
 
   @media (max-width: 992px) {
-    grid-template-columns: 1fr;
+    /* Meglévő stílusok */
     margin-top: 5px;
     margin-left: 25px;
     margin-right: auto;
     max-width: 90%;
     border-left: none;
+    grid-area: auto;
+
+    /* Oszlopos elrendezés beállítása */
+    display: flex;
+    flex-direction: column;
   }
 `;
 
-const ProductImage = styled.img`
-  grid-area: 1 / 2;
 
+
+const ProductImage = styled.img`
+    width: 100%;    
+  grid-area: 1 / 2;
+  
   @media (max-width: 992px) {
     grid-area: auto;
   }
@@ -96,12 +102,14 @@ justify-content: center;
 display: flex;
 align-items: center;
 
+
 }
 `;
 
 const ResponsiveRow = styled(Row)`
 @media (max-width: 992px) {
 justify-content: center;
+
 }
 `;
 
@@ -119,6 +127,7 @@ function Products() {
     const [addedToCart, setAddedToCart] = useState(false); // Új állapot az ellenőrzéshez
     const [selectedCategory, setSelectedCategory] = useState('');
     const [allProducts, setAllProducts] = useState([]);
+    const roles = localStorage.getItem('role');
     const increaseQuantity = () => {
         setQuantity((prevQuantity) => prevQuantity + 1);
     };
@@ -307,21 +316,31 @@ function Products() {
         <div>
                       
             <div className='products-body ' >
-                <Navbar className='my-custom-navbar'  expand='lg'>
+            <Navbar className='my-custom-navbar'  expand='lg'>
                     <Container style={{justifyContent: 'end'}}>
                         <Navbar.Toggle  aria-controls='basic-navbar-nav'/>        
                         <Navbar.Collapse id='basic-navbar-nav' className=' justify-content-end'>                       
-                        <Nav>
-                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/'>
-                                Főoldal
+                        <Nav> 
+                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Home'>
+                            Főolal
                             </Nav.Link>
                             <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Products'>
                             Termékek
                             </NavbarBrand>
                             <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
-                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Cart'>
-                            Kosár
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Cart'>
+                                Kosár
                             </Nav.Link>
+                            {isLoggedIn && ( // Megjelenítem a Rendelés fület csak akkor, ha be van jelentkezve a felhasználó
+                            <Nav.Link style={{ color: 'bisque' }} as={Link} to='/Order'>
+                            Rendelés
+                            </Nav.Link>
+                            )}
+                            {isLoggedIn && roles.includes('ADMIN') && ( // Csak akkor jelenítjük meg az Admin fület, ha a felhasználó admin
+                              <Nav.Link style={{ color: 'bisque' }} as={Link} to='/Admin'>
+                                Admin
+                              </Nav.Link>
+                            )}
                             {!isLoggedIn && (
                             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Registration'>
                                 Regisztráció
@@ -336,6 +355,7 @@ function Products() {
                                 Bejelentkezés
                             </Nav.Link>
                             )}
+                            
                         </Nav>
                         </Navbar.Collapse>
                     
@@ -366,8 +386,7 @@ function Products() {
                 
                 
                 
-                <div  style={{marginTop: '30px',marginLeft: '25px', marginBottom: '30px'}}> 
-                    
+                <div  style={{marginTop: '30px',marginLeft: '25px', marginBottom: '30px', display: 'flex'}}>           
                     <select onChange={(e) => handleProductSelect(e.target.value)}>
                         <option value="">Válassz egy Terméket</option>
                         <optgroup label="HUNTER Öntözőautomatikák">
@@ -380,16 +399,17 @@ function Products() {
                         </optgroup>
                     </select>
                 </div>
+                <hr style={{color: 'red',borderWidth: '5px', borderRadius: '100% 0 0 0'}}></hr>
                 {mappedData.length > 0 && (
                     <ProductContent >
                         {mappedData[0]?.products && mappedData[0].products.map((product, index) => (
                             <div key={index}>
-                                <div style={{ float: 'left', marginRight: '20px' }}>
+                                <div style={{ marginRight: '20px', display: 'flex' }}>
                                     {selectedProductId === '1' && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '100%', maxWidth: '150px' }} />
+                                        <img  src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '250px' }} />
                                     )}
                                     {selectedProductId === '2' && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='X-CORE' style={{ width: '100%', maxWidth: '150px' }} />
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='X-CORE' style={{ width: '150%', maxWidth: '250px' }} />
                                     )}
                                 </div>
                                 <div style={{ overflow: 'hidden' }}>
@@ -410,12 +430,12 @@ function Products() {
                     <ProductContent>
                         {allmappedData.map((product, index) => (
                             <div key={index}>
-                                <div style={{ float: 'left', marginRight: '20px' }}>
+                                <div style={{ marginRight: '20px', }}>
                                 {product.id == 1 && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '100%', maxWidth: '150px' }} />
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px' }} />
                                     )}
                                 {product.id == 2 && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='NODE-BT' style={{ width: '100%', maxWidth: '150px' }} />
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px' }} />
                                     )}    
                                     
                                 </div>
@@ -427,7 +447,7 @@ function Products() {
                                     <button onClick={decreaseQuantity}>-</button>
                                     <span style={{ margin: '0 10px' }}>{quantity}</span>
                                     <button onClick={increaseQuantity}>+</button>
-                                    <button onClick={() => handleAddToCartAll(product ,quantity)}>Kosárba</button>
+                                    <button style={{marginBottom: '15px'}} onClick={() => handleAddToCartAll(product ,quantity)}>Kosárba</button>
                                 </div>
                             </div>
                         ))}

@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import {  AuthContext } from './AuthContext';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 
 const ResponsiveNavbar = styled.nav`
     
@@ -83,7 +84,7 @@ function Registration()
   const [passwordError, setPasswordError] = useState('');
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState(''); 
-
+  const navigate = useNavigate();
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
@@ -192,6 +193,7 @@ function Registration()
       .then(data => {
           console.log(data);
           console.log(requestData)
+          navigate('/Home');
           
       })
 
@@ -227,6 +229,11 @@ function Registration()
             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Cart'>
               Kosár
             </Nav.Link>
+            {isLoggedIn && ( // Megjelenítem a Rendelés fület csak akkor, ha be van jelentkezve a felhasználó
+                <Nav.Link style={{ color: 'bisque' }} as={Link} to='/Order'>
+                  Rendelés
+                </Nav.Link>
+              )}
             {!isLoggedIn && (
               <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Registration'>
                 Regisztráció

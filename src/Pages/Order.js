@@ -1,16 +1,76 @@
 import React, { useEffect, useState, useContext } from 'react';
 import './Order.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Row, Container, Button, Dropdown, Form} from 'react-bootstrap';
+import {Row, Container, Button, Dropdown, Form, Nav, Navbar, NavDropdown, NavbarBrand} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faBars} from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useCartContext } from './CartContext';
 import {  AuthContext } from './AuthContext';
+import styled from 'styled-components';
+
+const ResponsiveNavbar = styled.nav`
+    
+position: relative;
+top: 19%;
+width: 100%;
+
+@media (max-width: 992px) {
+  background-color: lightblue;
+  
+}
+`;
 
 
 
+const NavbarUl = styled.ul`
+display: flex;
+justify-content: space-between;
+text-align: right;  /* Szöveg jobbra igazítása */
+
+@media (max-width: 992px) {
+  flex-direction: column;
+}
+`;
+
+const NavbarLi = styled.li`
+margin-left: 1rem;
+
+@media (max-width: 992px) {
+  margin-left: 0;
+}
+`;
+
+const NavbarLink = styled(Link)`
+font-size: 1.2rem;
+
+@media (max-width: 992px) {
+  font-size: 1rem;
+}
+`;
+
+const ResponsiveContainer = styled(Container)`
+  margin-top: 50px;
+
+  @media (max-width: 992px) {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    margin-top: calc(100px + 10px); /* A navbar magassága + némi extra tér */
+  }
+`;
+
+
+const ResponsiveRow = styled(Row)`
+@media (max-width: 992px) {
+justify-content: center;
+}
+`;
+
+const ResponsiveForm = styled(Form)`
+  width: 100%; /* Az űrlap szélessége legyen 100% */
+`;
 
 function Order() {
   const { cartItems, clearCart, userId: initialUserId, setUserId: setInitialUserId } = useCartContext();
@@ -18,7 +78,7 @@ function Order() {
   const [orderSent, setOrderSent] = useState(false);
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState(initialUserId || '');
-
+  const roles = localStorage.getItem('role');
   useEffect(() => {
     if (!initialUserId) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -160,74 +220,97 @@ function Order() {
 
   return (
     <div>
-      <Container>   
-            <Dropdown>
-            <Dropdown.Toggle>
-                <FontAwesomeIcon icon={faBars} size='2x' />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-                <Dropdown.Item>
-              {isLoggedIn ? (
-                <Link className="nav-link navbar-brand text-center" onClick={handleLogout} to="/Home">Kijelentkezés</Link>
-              ) : (
-                <Link className="nav-link navbar-brand text-center" to="/Login">Bejelentkezés</Link>
-              )}
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Registration">Regisztráció</Link>          
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <Link className="nav-link navbar-brand text-center" to="/Cart">Kosár</Link>          
-            </Dropdown.Item> 
-            </Dropdown.Menu>
-            </Dropdown>
-        </Container> 
+     <Navbar className='my-custom-navbar'  expand='lg'>
+                    <Container style={{justifyContent: 'end'}}>
+                        <Navbar.Toggle  aria-controls='basic-navbar-nav'/>        
+                        <Navbar.Collapse id='basic-navbar-nav' className=' justify-content-end'>                       
+                        <Nav> 
+                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Home'>
+                            Főolal
+                            </Nav.Link>
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Cart'>
+                            Termékek
+                            </Nav.Link>  
+                            <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
+                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Products'>
+                            Kosár
+                            </Nav.Link>
+                            {isLoggedIn && ( // Megjelenítem a Rendelés fület csak akkor, ha be van jelentkezve a felhasználó
+                            <NavbarBrand style={{ color: 'bisque' }} as={Link} to='/Order'>
+                            Rendelés
+                            </NavbarBrand>
+                            )}
+                            {isLoggedIn && roles.includes('ADMIN') && ( // Csak akkor jelenítjük meg az Admin fület, ha a felhasználó admin
+                              <Nav.Link style={{ color: 'bisque' }} as={Link} to='/Admin'>
+                                Admin
+                              </Nav.Link>
+                            )}
+                            {!isLoggedIn && (
+                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Registration'>
+                                Regisztráció
+                            </Nav.Link>
+                            )}
+                            {isLoggedIn ? (
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Login' onClick={handleLogout}>
+                                Kijelentkezés
+                            </Nav.Link>
+                            ) : (
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Login'>
+                                Bejelentkezés
+                            </Nav.Link>
+                            )}
+                            
+                        </Nav>
+                        </Navbar.Collapse>
+                    
+                    </Container>
+                </Navbar>
 
         
-        <div className="products-form "  style={{ borderLeft: '5px solid black', overflowY: 'auto' }}>
+      
                
      {/* Rendelés fül */}
      <div  className="order-container" style={{ height: '200vh',  marginLeft: '5%'}}>
-        <div style={{marginRight: '10%', marginTop: '-25px'}} className='bg-overlay'>
-            <Container>
-                <Row className="justify-content-center" style={{minHeight: '50vh', width: '50vh', margin:'0 auto'}}>              
+        <div className='bg-overlay'>
+            <ResponsiveContainer>
+                <ResponsiveRow className="justify-content-center" style={{minHeight: '50vh', width: '50vh', margin:'0 auto'}}>              
                     <div  className="order-form">                               
                     <h2 style={{paddingTop: '5%', textDecoration: 'underline'}}>Rendelés</h2>
-                    <Form onSubmit={handleOrder}>
-                    <Form.Group   controlId="formBasicBillingName" style={{marginBottom: '30px', width: '46.5vh'}}>
+                    <ResponsiveForm onSubmit={handleOrder}>
+                    <Form.Group   controlId="formBasicBillingName" style={{marginBottom: '30px'}}>
                     <Form.Label style={{marginBottom: '10px'}}>Számlázási név</Form.Label>
-                    <Form.Control name='billingName' style={{width: '98.5%'}} type="text" placeholder="Add meg a számlázási nevet" />
+                    <Form.Control name='billingName' style={{}} type="text" placeholder="Add meg a számlázási nevet" />
                     </Form.Group>
                     <Form.Label>Számlázási cím</Form.Label>
                     <Form.Group controlId="formBasicBillingPostalCode" style={{marginBottom: '30px', display: 'flex'}}>
-                    <Form.Control name='billingPostalCode' style={{marginRight : '2%', width: '15%'}} type="text" placeholder="Irányítószám"/>
-                    <Form.Control name='billingAddress' style={{width: '100%'}} type="text" placeholder="Add meg a számlázási címet"/>
+                    <Form.Control name='billingPostalCode' style={{marginRight : '2%', width: '60px'}} type="text" placeholder="Irányítószám"/>
+                    <Form.Control name='billingAddress' style={{}} type="text" placeholder="Add meg a számlázási címet"/>
                     </Form.Group>
 
-                    <Form.Group controlId="formBasicBillingEmail" style={{marginBottom: '30px', width: '46.5vh'}}>
+                    <Form.Group controlId="formBasicBillingEmail" style={{marginBottom: '30px'}}>
                     <Form.Label>Email cím</Form.Label>
-                    <Form.Control name='email' style={{width: '98.5%'}} type="email" placeholder="Add meg az email címed"/>
+                    <Form.Control name='email' style={{}} type="email" placeholder="Add meg az email címed"/>
                     </Form.Group>
 
                     <Form.Label>Szállítási cím</Form.Label>
                     <Form.Group controlId="formBasicAddress" style={{marginBottom: '30px', display: 'flex'}}>                  
-                    <Form.Control name='postalCode' style={{marginRight : '2%', width: '15%'}} type="text" placeholder="Irányítószám"/>
-                    <Form.Control name='deliveryAddress' style={{ width: '100%'}} type="text" placeholder="Add meg a szállítási cím"/>
+                    <Form.Control name='postalCode' style={{marginRight : '2%', width: '60px'}} type="text" placeholder="Irányítószám"/>
+                    <Form.Control name='deliveryAddress' style={{}} type="text" placeholder="Add meg a szállítási cím"/>
                     </Form.Group>
 
-                    <Form.Group controlId="formBasicBillingPhoneNumber" style={{marginBottom: '30px', width: '46.5vh'}}>
+                    <Form.Group controlId="formBasicBillingPhoneNumber" style={{marginBottom: '30px'}}>
                     <Form.Label>Telefonszám</Form.Label>
-                    <Form.Control name='phoneNumber' style={{width: '98.5%'}} type="tel" placeholder="Add meg a telefonszámot"/>
+                    <Form.Control name='phoneNumber' style={{}} type="tel" placeholder="Add meg a telefonszámot"/>
                     </Form.Group>
 
-                    <button  style={{backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: ' 15px'}}>Megrendelés</button>
+                    <button  style={{width: '100%',backgroundColor: 'Green', color: 'white', height: '50px', borderRadius: '50px', marginBottom: ' 15px'}}>Megrendelés</button>
                     <div>
                     <Link to="/Home">
                       <button
                         style={{
+                          width: '100%',
                           backgroundColor: 'grey',
-                          color: 'white',
-                          width: ' 100%',
+                          color: 'white',   
                           height: '50px',
                           borderRadius: '50px',
                           marginBottom: ' 15px'
@@ -242,9 +325,9 @@ function Order() {
                     <Link to="/Cart">
                       <button
                         style={{
+                          width: '100%',
                           backgroundColor: 'black',
-                          color: 'white',
-                          width: ' 100%',
+                          color: 'white',                         
                           height: '50px',
                           borderRadius: '50px',
 
@@ -254,14 +337,14 @@ function Order() {
                       </button>
                     </Link>
                   </div>              
-                    </Form>
+                    </ResponsiveForm>
                 </div>              
-            </Row>
-        </Container>
+            </ResponsiveRow>
+        </ResponsiveContainer>
     </div>
     </div>
 </div>
-</div>
+
   );
 }
 
