@@ -17,10 +17,14 @@ namespace Bakcend.Controllers
 
             var merchant = new Merchant()
             {
+                UserId = createMerchantDto.UserId,
                 SerialName = createMerchantDto.SerialName,
                 Type = createMerchantDto.Type,
-                Price = createMerchantDto.Price,
-                UserId = createMerchantDto.UserId,  
+                Price = createMerchantDto.Price,                  
+                ProductId = createMerchantDto.ProductId,
+                Quantity = createMerchantDto.Quantity,
+                
+                
                
             };
 
@@ -34,7 +38,7 @@ namespace Bakcend.Controllers
                 {
                     context.Add(merchant);
                     context.SaveChanges();
-                    return StatusCode(201, "Sikeres hozzáadás");
+                    return Ok(merchant);
                 }
 
             }
@@ -47,26 +51,13 @@ namespace Bakcend.Controllers
             {
                 var merchant = context.Merchants.FirstOrDefault(x => x.Id == id);
 
-                var result = context.Quantities.
-                       Include(x => x.Merchant).
-                       Select(x => new { x.Merchant, x.Id, x.QuantityPurchased }).
-                       Where(x => x.Id == id).ToList();
-
-                if (result.Count != 0)
-                {
-                    return Ok( result);
-                }
-
                 if (merchant == null)
                 {
                     return NotFound();
                 }
 
                 return Ok(merchant);
-
-
             }
-
         }
 
         [HttpGet]
@@ -74,28 +65,15 @@ namespace Bakcend.Controllers
         {
             using (var context = new WebshopContext())
             {
-                var merchant = context.Merchants.FirstOrDefault();
+                var merchants = context.Merchants.ToList();
 
-                var result = context.Quantities.
-                       Include(x => x.Merchant).
-                       Select(x => new { x.Merchant, x.Id, x.QuantityPurchased })
-                       .ToList();
-
-                if (result.Count != 0)
-                {
-                    return Ok(result);
-                }
-
-                if (merchant == null)
+                if (merchants == null || merchants.Count == 0)
                 {
                     return NotFound();
                 }
 
-                return Ok(merchant);
-
-
+                return Ok(merchants);
             }
-
         }
 
         [HttpDelete("{id}")]

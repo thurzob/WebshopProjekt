@@ -3,6 +3,7 @@ using System;
 using Bakcend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bakcend.Migrations
 {
     [DbContext(typeof(WebshopContext))]
-    partial class WebshopContextModelSnapshot : ModelSnapshot
+    [Migration("20240304165720_Webshop3")]
+    partial class Webshop3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,10 +257,10 @@ namespace Bakcend.Migrations
                         .HasColumnType("int(50)");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int(110)");
+                        .HasColumnType("int");
 
                     b.Property<string>("SerialName")
                         .IsRequired()
@@ -270,6 +273,7 @@ namespace Bakcend.Migrations
                         .HasColumnType("varchar(200)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id")
@@ -278,6 +282,21 @@ namespace Bakcend.Migrations
                     b.HasIndex(new[] { "UserId" }, "UserId");
 
                     b.ToTable("merchant", (string)null);
+                });
+
+            modelBuilder.Entity("Bakcend.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("Orders")
+                        .HasColumnType("int(20)");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("order", (string)null);
                 });
 
             modelBuilder.Entity("Bakcend.Models.Product", b =>
@@ -303,65 +322,6 @@ namespace Bakcend.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("product", (string)null);
-                });
-
-            modelBuilder.Entity("Bakcend.Models.Purchase", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)");
-
-                    b.Property<string>("BillingAddress")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("BillingName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("BillingPostalCode")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("Date")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("current_timestamp()");
-
-                    b.Property<string>("DeliveryAddress")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "UserId" }, "UserId")
-                        .HasDatabaseName("UserId1");
-
-                    b.ToTable("purchase", (string)null);
                 });
 
             modelBuilder.Entity("Bakcend.Models.Storage", b =>
@@ -484,19 +444,10 @@ namespace Bakcend.Migrations
                 {
                     b.HasOne("Bakcend.Models.Aspnetuser", "User")
                         .WithMany("Merchants")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Bakcend.Models.Purchase", b =>
-                {
-                    b.HasOne("Bakcend.Models.Aspnetuser", "User")
-                        .WithMany("Purchases")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("purchase_ibfk_1");
+                        .HasConstraintName("merchant_ibfk_1");
 
                     b.Navigation("User");
                 });
@@ -515,8 +466,6 @@ namespace Bakcend.Migrations
                     b.Navigation("Aspnetusertokens");
 
                     b.Navigation("Merchants");
-
-                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

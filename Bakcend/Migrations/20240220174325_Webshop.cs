@@ -111,39 +111,8 @@ namespace Bakcend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_general_ci");
-
-            migrationBuilder.CreateTable(
-                name: "quantity",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int(100)", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    quantityPurchased = table.Column<int>(type: "int(100)", nullable: false),
-                    MerchantId = table.Column<int>(type: "int(11)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PRIMARY", x => x.Id);
-                    table.ForeignKey(
-                        name: "quantity_ibfk_1",
-                        column: x => x.MerchantId,
-                        principalTable: "merchant",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4")
-                .Annotation("Relational:Collation", "utf8mb4_general_ci");
-
-            migrationBuilder.CreateIndex(
-                name: "UserId",
-                table: "merchant",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "MerchantId",
-                table: "quantity",
-                column: "MerchantId");
         }
+
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -154,8 +123,7 @@ namespace Bakcend.Migrations
             migrationBuilder.DropTable(
                 name: "product");
 
-            migrationBuilder.DropTable(
-                name: "quantity");
+           
 
             migrationBuilder.DropTable(
                 name: "storage");

@@ -1,36 +1,47 @@
+using Bakcend.Data;
+using Bakcend.Models;
+using Bakcend.Models.DTO;
+using Bakcend.Service;
+using Bakcend.Service.IAuth;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using static Bakcend.Models.WebshopContext;
 
 
 namespace Bakcend
 {
     public class Program
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.Cookie.Name = "YourAppCookieName";
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.Cookie.SameSite = SameSiteMode.Strict;
-                    options.LoginPath = "/Account/Login";
-                    options.LogoutPath = "/Account/Logout";
-                });
-
-            services.AddAuthorization();
-
-            // További beállítások és szolgáltatások regisztrálása...
-        }
-
-
         public static void Main(string[] args)
         {
+  
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<AppDbContext>(option =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("MySql");
+                option.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+
+            });
+
+           
+
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AuthSettings:JwtOptions"));
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+            
+
+
 
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -76,5 +87,10 @@ namespace Bakcend
 
             app.Run();
         }
+
+
+
+
+        
     }
 }

@@ -13,9 +13,11 @@ public partial class Merchant
 
     public int Price { get; set; }
 
-    public int? UserId { get; set; }
+    public int ProductId { get; set; }
 
-    public virtual ICollection<Quantity> Quantity { get; set; } = new List<Quantity>();
+    public int Quantity { get; set; }
 
-    public virtual User? User { get; set; }
+    public string? UserId { get; set; }
+
+    public virtual Aspnetuser? User { get; set; }
 }

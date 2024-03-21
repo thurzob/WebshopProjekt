@@ -1,0 +1,137 @@
+﻿using Bakcend.Models.DTO;
+using Bakcend.Service.IAuth;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
+using Backend.Service;
+using System.Net.Mail;
+using System.Net;
+using SendGrid.Helpers.Mail;
+using SendGrid;
+
+namespace Auth.Controllers
+{
+
+
+
+    [Route("auth")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService authService;
+        private readonly string outlookEmailAddress = "bence.thurzo@outlook.hu"; // Gmail címed
+        private readonly string outlookEmailPassword = "Fundango980123"; // Gmail jelszavad
+
+        public AuthController(IAuthService authService)
+        {
+            this.authService = authService;
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(RegisterRequestDto registerRequestDto)
+        {
+            var errorMessage = await authService.Register(registerRequestDto);
+
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                return StatusCode(400, errorMessage);
+            }
+            return StatusCode(201, "Sikeres regisztráció");
+        }
+
+
+        [HttpPost("AssignRole")]
+        public async Task<ActionResult> AssignRole([FromBody] RoleDto model)
+        {
+
+            var assignRoleSuccesful = await authService.AssignRole(model.Email, model.Role.ToUpper());
+
+            if (!assignRoleSuccesful)
+            {
+                return BadRequest();
+            }
+
+
+            return StatusCode(200, "Sikeres szerep létrehozás.");
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult> Login([FromBody] LoginRequestDto model)
+        {
+            var loginResponse = await authService.Login(model);
+
+            if (loginResponse == null || loginResponse.Token == null)
+            {
+                return BadRequest("Nem megfelelő felhasználónév vagy jelszó!");
+            }
+
+            // Token dekódolása és felhasználó azonosítójának kinyerése
+            var jwtTokenDecoder = new JwtTokenDecoder();
+            var userId = jwtTokenDecoder.GetUserIdFromToken(loginResponse.Token);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(); // Ha nem sikerült kinyerni a felhasználó azonosítóját a tokentől
+            }
+
+            // Visszaadjuk a token-t és a felhasználó azonosítóját (GUID)
+            var loginResponseWithUserId = new LoginResponseDto
+            {
+                Token = loginResponse.Token,
+                UserId = userId // Felhasználó GUID-ja
+            };
+
+            return StatusCode(200, loginResponseWithUserId);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<ActionResult> ResetPasswordManually(PasswordResetRequestDto passwordResetRequestDto)
+        {
+            try
+            {
+                // Ellenőrizd, hogy az email cím nem üres
+                if (string.IsNullOrEmpty(passwordResetRequestDto.Email))
+                {
+                    return StatusCode(400, "Az email cím nem lehet üres.");
+                }
+
+                // Jelszó frissítése az adatbázisban
+                var passwordUpdated = await authService.ResetPassword(passwordResetRequestDto.Email);
+
+                if (!passwordUpdated)
+                {
+                    return StatusCode(500, "Nem sikerült frissíteni az új jelszót az adatbázisban.");
+                }
+
+                // Jelszó generálása
+                var newPassword = authService.GenerateRandomPassword();
+
+                // Email küldése a visszaállított jelszóval
+                using (var client = new SmtpClient("smtp.office365.com", 587))
+                {
+                    client.EnableSsl = true;
+                    client.Credentials = new NetworkCredential(outlookEmailAddress, outlookEmailPassword);
+
+                    var mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress(outlookEmailAddress);
+                    mailMessage.To.Add(passwordResetRequestDto.Email);
+                    mailMessage.Subject = "Jelszó visszaállítás";
+                    mailMessage.Body = "Az új jelszavad: " + newPassword;
+
+                    client.Send(mailMessage);
+                }
+
+                return StatusCode(200, "Az új jelszó sikeresen frissítve az adatbázisban és elküldve az email címre.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Hiba történt az új jelszó mentése és az email küldése közben: {ex.Message}");
+            }
+        }
+    }
+
+}
+
+
+    
+

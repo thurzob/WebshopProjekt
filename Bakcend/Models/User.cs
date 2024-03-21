@@ -16,6 +16,4 @@ public partial class User
     public int PhoneNumber { get; set; }
 
     public DateOnly? Date { get; set; }
-
-    public virtual ICollection<Merchant> Merchant { get; set; } = new List<Merchant>();
 }
