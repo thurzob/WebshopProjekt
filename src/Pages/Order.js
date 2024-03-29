@@ -73,34 +73,23 @@ const ResponsiveForm = styled(Form)`
 `;
 
 function Order() {
-  const { cartItems, clearCart, userId: initialUserId, setUserId: setInitialUserId } = useCartContext();
+  const { cartItems, clearCart } = useCartContext();
   const { isLoggedIn, logout } = useContext(AuthContext);
   const [orderSent, setOrderSent] = useState(false);
   const [token, setToken] = useState('');
-  const [userId, setUserId] = useState(initialUserId || '');
+  const [userId, setUserId] = useState('');
   const roles = localStorage.getItem('role');
   useEffect(() => {
-    if (!initialUserId) {
+    if (!userId) {
       const urlParams = new URLSearchParams(window.location.search);
       const userIdFromUrl = urlParams.get('userId');
       if (userIdFromUrl) {
         setUserId(userIdFromUrl);
       }
     }
-  }, [initialUserId]);
+  }, [userId]);
 
-  const handleLogin = (userId) => {
-    localStorage.setItem('userId', userId);
-    setUserId(userId);
-
-    // A bejelentkezés utáni frissítés helyett:
-    // Frissítsd a komponens állapotát a bejelentkezett felhasználó adataival
-
-    // Példa:
-    // setLoggedIn(true);
-    // setUserData(data); // A bejelentkezési API-ból kapott felhasználói adatok
-
-  };
+  
 
   const handleOrder = (event) => {
     event.preventDefault();
@@ -113,7 +102,7 @@ function Order() {
       const postalCode = formData.get('postalCode');
       const deliveryAddress = formData.get('deliveryAddress');
       const phoneNumber = formData.get('phoneNumber');
-
+      const storedUserId = localStorage.getItem('userId');
       
 
       fetch('https://localhost:7276/api/Purchase', {
@@ -131,7 +120,7 @@ function Order() {
             postalCode,
             deliveryAddress,
             phoneNumber,
-            UserId: userId
+            UserId: storedUserId
           })
         })
         .then(response => {
@@ -153,7 +142,7 @@ function Order() {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                userId: userId,
+                UserId: storedUserId,
                 serialName: item.serialName,
                 type: item.type,
                 price: item.price,
@@ -175,7 +164,7 @@ function Order() {
             .catch(error => {
               console.error('Fetch error:', error); // hibaüzenet naplózása a konzolon
               console.log('Elküldött adatok:', {
-                userId: userId,
+                UserId: storedUserId,
                 serialName: item.serialName,
                 type: item.type,
                 price: item.price,
@@ -199,7 +188,7 @@ function Order() {
             postalCode,
             deliveryAddress,
             phoneNumber,
-            UserId: userId
+            UserId: storedUserId 
           });
         });
       
@@ -228,11 +217,11 @@ function Order() {
                             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Home'>
                             Főolal
                             </Nav.Link>
-                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Cart'>
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Products'>
                             Termékek
                             </Nav.Link>  
                             <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
-                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Products'>
+                            <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Cart'>
                             Kosár
                             </Nav.Link>
                             {isLoggedIn && ( // Megjelenítem a Rendelés fület csak akkor, ha be van jelentkezve a felhasználó

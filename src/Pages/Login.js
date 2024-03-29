@@ -231,10 +231,6 @@ const handleSendPasswordReset = async () => {
       });
    
   };
-
- 
- 
-
   const handleLogout = () =>{
     logout();
     setToken('');
@@ -342,8 +338,6 @@ const handleSendPasswordReset = async () => {
                   </div>
                 </div>
               </Form>
-
-              
             </div>
           </ResponsiveRow>
         </ResponsiveContainer>

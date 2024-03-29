@@ -273,11 +273,11 @@ function Cart() {
                             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Home'>
                             Főolal
                             </Nav.Link>
-                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Cart'>
+                            <Nav.Link style={{color: 'bisque'}} as={Link} to='/Products'>
                             Termékek
                             </Nav.Link>  
                             <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
-                            <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Products'>
+                            <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Cart'>
                             Kosár
                             </NavbarBrand>
                             {isLoggedIn && ( // Megjelenítem a Rendelés fület csak akkor, ha be van jelentkezve a felhasználó

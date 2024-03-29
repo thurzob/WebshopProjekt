@@ -10,12 +10,16 @@
   
   .admin-form {
     background-color: rgba(255, 255, 255, 0.4);
-   
+    margin-left: -50px;
     border-radius: 50px;
     backdrop-filter: blur(10px);
-    margin-top: 100px;
-    width: 100%;
+    margin-top: 90px;
+    width: 110%;
     min-height: 800px;
+  }
+
+  .table-container {
+    overflow-x: auto;
   }
 
   @media (max-width: 992px) {
