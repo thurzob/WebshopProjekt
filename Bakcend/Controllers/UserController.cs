@@ -10,6 +10,8 @@ using Bakcend.Service.IAuth;
 using Bakcend.Service;
 using Bakcend.Data;
 using System;
+using System.Text;
+using System.Security.Cryptography;
 
 
 namespace Bakcend.Controllers
@@ -18,33 +20,41 @@ namespace Bakcend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        
 
         [HttpPost]
-        public async Task<ActionResult> Register(CreateUserDto createUserDto)
+        public ActionResult Post(CreateUserDto createUserDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
 
-            var user = new User
+            var newUser = new Aspnetuser()
             {
-                Name = createUserDto.Name,               
+                Id = Guid.NewGuid().ToString(),
+                FullName = createUserDto.FullName,
+                UserName = createUserDto.UserName,
                 Email = createUserDto.Email,
-                PhoneNumber = createUserDto.PhoneNumber,           
-                // További adatok beállítása...
+                Age = createUserDto.Age,
+                PasswordHash = HashPassword(createUserDto.PasswordHash),              
+                PhoneNumber = createUserDto.PhoneNumber,
+
+
             };
 
-            // Regisztráció manuális hozzáadása
             using (var context = new WebshopContext())
             {
-                context.Users.Add(user);
-                await context.SaveChangesAsync();
-            }
+                if (newUser == null)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    context.Add(newUser);
+                    context.SaveChanges();
+                    return Ok(newUser);
+                }
 
-            return Ok(user);
+            }
         }
+
+
 
         [HttpGet("{id}")]
         public ActionResult Get(int id)
@@ -98,6 +108,8 @@ namespace Bakcend.Controllers
                             Age = userWithMerchantAndPurchase.Age,
                             UserName = userWithMerchantAndPurchase.UserName,
                             Email = userWithMerchantAndPurchase.Email,
+                            PasswordHash = userWithMerchantAndPurchase.PasswordHash,
+                            PhoneNumber = userWithMerchantAndPurchase.PhoneNumber,
                             // Itt töltsd ki a többi felhasználóhoz tartozó adatot
                             // ...
 
@@ -117,6 +129,7 @@ namespace Bakcend.Controllers
                             PurchaseBillingAddress = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.BillingAddress,
                             PurchaseEmail = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.Email,
                             PurchasePostalCode = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.PostalCode,
+                            PurchaseBillingPostalCode = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.BillingPostalCode,
                             PurchasaeDeliveryAddress = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.DeliveryAddress,
                             PurchasePhoneNumber = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.PhoneNumber,
                             PurchaseDate = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.Date ?? DateTime.MinValue,
@@ -139,16 +152,16 @@ namespace Bakcend.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult Delete(string id)
         {
             using (var context = new WebshopContext())
             {
 
-                var user = context.Users.FirstOrDefault(user => user.Id == id);
+                var user = context.Aspnetusers.FirstOrDefault(user => user.Id == id);
 
                 if (user != null)
                 {
-                    context.Users.Remove(user);
+                    context.Aspnetusers.Remove(user);
                     context.SaveChanges();
 
                     return StatusCode(200, "Sikeres törlés");
@@ -159,32 +172,99 @@ namespace Bakcend.Controllers
                 }
             }
         }
-
-        [HttpPut("{id}")]
-        public ActionResult Put(int id, UpdateUserDto updateUserDto)
+        [HttpPatch("{id}")]
+        public ActionResult Patch(string id, UpdateUserDto updateUserDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             using (var context = new WebshopContext())
             {
-                var existinguser = context.Users.FirstOrDefault(user => user.Id == id);
+                var existingUser = context.Aspnetusers.FirstOrDefault(aspnetuser => aspnetuser.Id == id);
 
-                if (existinguser != null)
+                if (existingUser != null)
                 {
+                    // Csak a módosítandó mezőket frissítjük
+                    if (updateUserDto.FullName != null)
+                        existingUser.FullName = updateUserDto.FullName;
 
-                    existinguser.Name = updateUserDto.Name;                   
-                    existinguser.Email = updateUserDto.Email;
-                    existinguser.PhoneNumber = updateUserDto.PhoneNumber;
-                    
+                    if (updateUserDto.UserName != null)
+                        existingUser.UserName = updateUserDto.UserName;
 
-                    context.Users.Update(existinguser);
-                    context.SaveChanges();
+                    if (updateUserDto.Email != null)
+                        existingUser.Email = updateUserDto.Email;
 
-                    return StatusCode(200, "Sikeres frissítés!");
+                    if (updateUserDto.Age != null)
+                        existingUser.Age = updateUserDto.Age;
+
+                    if (updateUserDto.PhoneNumber != null)
+                        existingUser.PhoneNumber = updateUserDto.PhoneNumber;
+
+                    // Ha a jelszó meg van adva a CreateUserDto-ban, akkor hasheljük azt
+                    if (updateUserDto.PasswordHash != null)
+                    {
+                        // Hasheljük a jelszót, mielőtt elmentenénk
+                        existingUser.PasswordHash = HashPassword(updateUserDto.PasswordHash);
+                    }
+
+                    // További mezők frissítése...
+
+                    // Az adatbázisban való frissítés tranzakcióban
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            context.SaveChanges();
+                            transaction.Commit();
+                            return Ok(new
+                            {
+                                Message = "Sikeres frissítés!",
+                                UpdatedFields = new
+                                {
+                                    FullName = existingUser.FullName,
+                                    UserName = existingUser.UserName,
+                                    Email = existingUser.Email,
+                                    Age = existingUser.Age,
+                                    PhoneNumber = existingUser.PhoneNumber,
+                                    PasswordHash = existingUser.PasswordHash
+                                }
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            transaction.Rollback();
+                            return StatusCode(500, new { Message = "Hiba történt a frissítés közben." });
+                        }
+                    }
                 }
                 else
                 {
                     return NotFound();
                 }
+            }
+        }
 
+        // Jelszó hashelése
+        private string HashPassword(string password)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                // Convert the input string to a byte array and compute the hash.
+                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                // Create a new StringBuilder to collect the bytes and create a string.
+                StringBuilder stringBuilder = new StringBuilder();
+
+                // Loop through each byte of the hashed data and format each one as a hexadecimal string.
+                for (int i = 0; i < data.Length; i++)
+                {
+                    stringBuilder.Append(data[i].ToString("x2"));
+                }
+
+                // Return the hexadecimal string.
+                return stringBuilder.ToString();
             }
         }
     }
