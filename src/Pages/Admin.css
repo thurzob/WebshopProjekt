@@ -10,11 +10,11 @@
   
   .admin-form {
     background-color: rgba(255, 255, 255, 0.4);
-    margin-left: -50px;
+    margin-left: -190px;
     border-radius: 50px;
     backdrop-filter: blur(10px);
     margin-top: 90px;
-    width: 110%;
+    width: 130%;
     min-height: 800px;
   }
 

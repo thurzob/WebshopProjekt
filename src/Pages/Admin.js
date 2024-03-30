@@ -46,10 +46,12 @@ function Admin()
   const [showNewTable, setShowNewTable] = useState(false);
   const [showNewRecord, setShowNewRecord] = useState(false);
   const [newRecord, setNewRecord] = useState({
+    id: '',
     fullName: '',
     userName: '',
     email: '',
     age: '',
+    passwordHash: '',
     phoneNumber: ''
   });
 
@@ -96,50 +98,61 @@ function Admin()
       console.error('Fetch error:', error);
     });
   };
-  const handlePut = (userId) => {
-    // Keresd meg a módosítandó elemet
-    const updatedOrder = orders.find(order => order.id === userId);
-    if (!updatedOrder) {
-      console.error('Nem található a felhasználó azonosítója:', userId);
-      return;
-  }
-  const age = parseInt(updatedOrder.age);
-
-    const userData = {
-        id: updatedOrder.id,
-        userName: updatedOrder.userName,
-        fullName: updatedOrder.fullName,
-        passwordHash: updatedOrder.passwordHash,
-        age: age,
-        email: updatedOrder.email,
-        phoneNumber: updatedOrder.phoneNumber
-    };
+  const handlePut = async (userId) => {
+    // Find the user to update
+    const updatedUser = orders.find(order => order.id === userId.toString());
+    console.log(userId)
     
-    fetch(`https://localhost:7276/api/User/${userId}`, {
-        method: 'PUT',
+    if (!updatedUser) {
+      console.error('User with ID', userId, 'not found');
+      return;
+    }
+  
+    // Ensure age is a number (considering potential type issues)
+    const age = typeof updatedUser.age === 'number' ? updatedUser.age : parseInt(updatedUser.age, 10);
+    if (isNaN(age)) {
+      console.error('Invalid age value for user', userId);
+      return;
+    }
+  
+    const userData = {
+      fullName: updatedUser.fullName,
+      userName: updatedUser.userName,
+      passwordHash: updatedUser.passwordHash,
+      age,
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+    };
+  
+    try {
+      const response = await fetch(`https://localhost:7276/api/User/${userId}`, {
+        method: 'PATCH',
         mode: 'cors',
         headers: {
-          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData)
-        
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('PUT request was successful with response:', data);
-            console.log(userData)
-        })
-        .catch(error => {
-            console.error('There was a problem with your PUT request:', error);
-            console.log(userData)
-        });
-};
+        body: JSON.stringify(userData), // Convert userData to JSON string
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Network response was not ok (status: ${response.status})`);
+      }
+  
+      const data = await response.json();
+      console.log('PATCH request successful with response:', data);
+      console.log('Updated user data:', userData); // Log updated user data as well
+    } catch (error) {
+      if (error instanceof TypeError) {
+        console.error('Invalid data type in the request:', error.message);
+      } else if (error.response) {
+        // Network response error, check response status and status text
+        console.error('Network error:', error.response.status, error.response.statusText);
+        console.error('Response body:', await error.response.text()); // Log response body for further details
+      } else {
+        console.error('Unknown error during PATCH request:', error);
+      }
+    }      
+};   
 
   const clearFilters = () => {
     setNameFilter(''); // Név szűrő ürítése
@@ -281,6 +294,31 @@ const handleNewRecordChange = (e, field) => {
   });
 };
 
+const handleAddNewUser = () => {
+  fetch(`https://localhost:7276/api/User`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newRecord, console.log(newRecord)),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log('New user added:', data);
+      // Állapotok frissítése, például:
+      // setNewRecord({}); // Új felhasználó adatainak ürítése
+      // setShowNewTable(false); // Az új felhasználók táblázat elrejtése
+      // Frissíthetjük az összes felhasználó adatait is
+    })
+    .catch((error) => {
+      console.error('Add new user error:', error);
+    });
+};
 
 
 
@@ -456,7 +494,7 @@ const handleNewRecordChange = (e, field) => {
             style={{
               width: '15%',
               height: '1%', 
-              marginTop: '2.9%', 
+              marginTop: '2.4%', 
               borderRadius: '15%', 
               backgroundColor: 'greenyellow' }}>
               Lekérdezés
@@ -469,7 +507,7 @@ const handleNewRecordChange = (e, field) => {
               style={{
                 width: '15%',
                 height: '1%', 
-                marginTop: '2.9%', 
+                marginTop: '2.4%', 
                 borderRadius: '15%', 
                 backgroundColor: 'greenyellow' }}>
               Új hozzáadása
@@ -478,11 +516,14 @@ const handleNewRecordChange = (e, field) => {
             <button 
               type='button'
               className='filter-button'
-              onClick={handleUploadClick}
+              onClick={() => {
+                handleUploadClick();
+                handleAddNewUser();
+              }}
               style={{
                 width: '15%',
                 height: '1%', 
-                marginTop: '2.9%', 
+                marginTop: '2.4%', 
                 borderRadius: '15%', 
                 backgroundColor: 'greenyellow' }}>
               Módosítás
@@ -495,15 +536,15 @@ const handleNewRecordChange = (e, field) => {
               style={{
                 width: '15%',
                 height: '1%', 
-                marginTop: '2.9%', 
+                marginTop: '2.4%', 
                 borderRadius: '15%', 
                 backgroundColor: 'red' }}>
               Kiválasztottak törlése
             </button>
             
           </ResponsiveRow>
-          <div className="table-container">
-          <Table  style={{width: '99%',marginRight: '1%', marginTop: '1%'}} striped bordered hover>
+          <div className="table-container"   style={{width: '99%'}}>
+          <Table  style={{marginTop: '1%'}} striped bordered hover>
             <thead>
               <tr>
                 <th>#</th>
@@ -608,56 +649,63 @@ const handleNewRecordChange = (e, field) => {
             </tbody>
               </Table>
               {showNewTable && (
-  <div className="table-container">
-    <Table style={{ width: '99%', marginRight: '1%', marginTop: '1%' }} striped bordered hover>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Teljes név</th>
-          <th>Felhasználónév</th>
-          <th>Email</th>
-          <th>Kor</th>
-          <th>Telefonszám</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>
-            <input
-              type="text"
-              onChange={(e) => handleNewRecordChange (e, 'fullName')}
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              onChange={(e) => handleNewRecordChange(e, 'userName')}
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              onChange={(e) => handleNewRecordChange(e, 'email')}
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              onChange={(e) => handleNewRecordChange(e, 'age')}
-            />
-          </td>
-          <td>
-            <input
-              type="text"
-              onChange={(e) => handleNewRecordChange(e, 'phoneNumber')}
-            />
-          </td>
-        </tr>
-      </tbody>
-    </Table>
-  </div>
-)}
+              <div className="table-container">
+                <Table style={{ width: '100%', marginTop: '1%' }} striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Teljes név</th>
+                      <th>Felhasználónév</th>
+                      <th>Email</th>
+                      <th>Kor</th>
+                      <th>Jelszó</th>
+                      <th>Telefonszám</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange (e, 'fullName')}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange(e, 'userName')}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange(e, 'email')}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange(e, 'age')}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange (e, 'passwordHash')}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          onChange={(e) => handleNewRecordChange(e, 'phoneNumber')}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </div>
+            )}
           </div>      
         </Form> 
         </div>
