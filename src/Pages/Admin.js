@@ -8,6 +8,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useCartContext } from './CartContext';
 import {  AuthContext } from './AuthContext';
 import styled from 'styled-components';
+import { FaTimes } from 'react-icons/fa'; 
 
 
 const ResponsiveContainer = styled(Container)`
@@ -15,9 +16,12 @@ const ResponsiveContainer = styled(Container)`
 justify-content: center;
 display: flex;
 align-items: center;
-
-
 }
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%; /* A konténer mindig kitölti a rendelkezésre álló teret */
+max-width: 100%; /* A konténer maximális szélessége 100%, hogy soha ne legyen szélesebb a táblázatnál */
 `;
 
 const ResponsiveRow = styled(Row)`
@@ -28,7 +32,6 @@ justify-content: center;
 
 function Admin()
 { 
-  
   const { isLoggedIn, login, logout } = useContext(AuthContext);    
   const [backendMessage, setBackendMessage] = useState('');
   const [formError, setFormError] = useState('');
@@ -41,10 +44,15 @@ function Admin()
   const [dateFilter, setDateFilter] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
   const roles = localStorage.getItem('role');
-  const [modifiedOrders, setModifiedOrders] = useState({});
+  const [modifiedUsers, setModifiedUsers] = useState({});
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [showNewTable, setShowNewTable] = useState(false);
   const [showNewRecord, setShowNewRecord] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [userRoles, setUserRoles] = useState({});
+  const [modifiedId, setModifiedId] = useState('');
+  const [modifiedRole, setModifiedRole] = useState('');
+  const [newRoleRecord, setNewRoleRecord] = useState('');
   const [newRecord, setNewRecord] = useState({
     id: '',
     fullName: '',
@@ -52,7 +60,8 @@ function Admin()
     email: '',
     age: '',
     passwordHash: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    newRole: ''
   });
 
   const handleLogout = () =>{
@@ -61,6 +70,7 @@ function Admin()
     setUserId('');
     localStorage.removeItem('userId');
   };
+  
 
   const getAllOrders = () => {
     // Visszaállítjuk az inputmezőket és a gombot
@@ -96,15 +106,79 @@ function Admin()
     })
     .catch(error => {
       console.error('Fetch error:', error);
-    });
+    }); 
   };
+  
+  const getAllUsers = () => {
+    // Felhasználók adatainak lekérése...
+    fetch(`https://localhost:7276/api/User`, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(usersData => {
+      // Felhasználók adatainak feldolgozása...
+      setUsers(usersData);
+  
+      // Szerepkörök lekérése...
+      fetch('https://localhost:7276/auth/GetRoles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(rolesData => {
+        // Szerepkörök feldolgozása és hozzáadása a felhasználókhoz...
+        const updatedUsers = usersData.map(user => {
+          const rolesForUser = rolesData.filter(role => role.userId === user.id);
+          const userRoles = rolesForUser.map(role => role.roles);
+          return { ...user, role: userRoles.join(', ') };
+        });
+        setUsers(updatedUsers);
+        
+      })
+      .catch(error => {
+        console.error('Error fetching roles:', error);
+      });
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+    });
+    
+  };
+ 
+  useEffect(() => {
+    // Ha a felhasználó a "Felhasználók" fülre kattintott és a "Lekérdezés" gombra is kattintott
+    if (activeTab === 'users' && showNewTable) {
+      // Töltsük le a felhasználók listáját
+      getAllUsers();
+    }
+  }, [showNewTable]);
+  
+  
+   
   const handlePut = async (userId) => {
     // Find the user to update
-    const updatedUser = orders.find(order => order.id === userId.toString());
+    const updatedUser = users.find(user => user.id === userId.toString());
     console.log(userId)
     
     if (!updatedUser) {
-      console.error('User with ID', userId, 'not found');
+      console.error();
       return;
     }
   
@@ -139,21 +213,44 @@ function Admin()
       }
   
       const data = await response.json();
-      console.log('PATCH request successful with response:', data);
-      console.log('Updated user data:', userData); // Log updated user data as well
+      // Log updated user data as well
     } catch (error) {
       if (error instanceof TypeError) {
-        console.error('Invalid data type in the request:', error.message);
+        
       } else if (error.response) {
         // Network response error, check response status and status text
-        console.error('Network error:', error.response.status, error.response.statusText);
-        console.error('Response body:', await error.response.text()); // Log response body for further details
+        
+        // Log response body for further details
       } else {
-        console.error('Unknown error during PATCH request:', error);
+        
       }
     }      
-};   
-
+  };   
+  const HandlePutRole = (modifiedId, modifiedRole) => {
+  
+  fetch(`https://localhost:7276/auth/assignPutRole`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: modifiedId,
+      newRole: modifiedRole
+      
+    })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to update user role'); 
+    }
+    console.log('User role updated successfully');
+    // Esetleges további műveletek...
+  })
+  .catch(error => {
+    console.error('Error updating user role:', error);
+    
+  });
+  };
   const clearFilters = () => {
     setNameFilter(''); // Név szűrő ürítése
     setEmailFilter(''); // Email szűrő ürítése
@@ -161,90 +258,95 @@ function Admin()
   
     
   };
-
-  
-
   const handleNameChange = (e, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].fullName = e.target.value;
-    setOrders(updatedOrders);
-    setModifiedOrders({
-        ...modifiedOrders,
-        [updatedOrders[index].id]: {
+    const updatedUsers = [...users];
+    updatedUsers[index].fullName = e.target.value;
+    setUsers(updatedUsers);
+    setModifiedUsers({
+        ...modifiedUsers,
+        [updatedUsers[index].id]: {
             fullName: e.target.value
         }
     });
   };
-
   const handleUserNameChange = (e, index) => {
-    const updatedOrders = [...orders]; 
-    updatedOrders[index].userName = e.target.value; 
-    setOrders(updatedOrders);
-    setModifiedOrders({
-      ...modifiedOrders,
-      [updatedOrders[index].id]: {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].userName = e.target.value; 
+    setUsers(updatedUsers);
+    setModifiedUsers({
+      ...modifiedUsers,
+      [updatedUsers[index].id]: {
           userName: e.target.value
       }
   });
   };
-
   const handleEmailChange = (e, index) => {
-    const updatedOrders = [...orders]; 
-    updatedOrders[index].email = e.target.value; 
-    setOrders(updatedOrders);
-    setModifiedOrders({
-      ...modifiedOrders,
-      [updatedOrders[index].id]: {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].email = e.target.value; 
+    setUsers(updatedUsers);
+    setModifiedUsers({
+      ...modifiedUsers,
+      [updatedUsers[index].id]: {
           email: e.target.value
       }
   });
   };
-
   const handleAgeChange = (e, index) => {
-    const updatedOrders = [...orders]; 
-    updatedOrders[index].age = e.target.value; 
-    setOrders(updatedOrders);
-    setModifiedOrders({
-      ...modifiedOrders,
-      [updatedOrders[index].id]: {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].age = e.target.value; 
+    setUsers(updatedUsers);
+    setModifiedUsers({
+      ...modifiedUsers,
+      [updatedUsers[index].id]: {
           age: e.target.value
       }
   });
   };
-
   const handlePasswordChange = (e, index) => {
-    const updatedOrders = [...orders]; 
-    updatedOrders[index].passwordHash = e.target.value; 
-    setOrders(updatedOrders);
-    setModifiedOrders({
-      ...modifiedOrders,
-      [updatedOrders[index].id]: {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].passwordHash = e.target.value; 
+    setUsers(updatedUsers);
+    setModifiedUsers({
+      ...modifiedUsers,
+      [updatedUsers[index].id]: {
           passwordHash: e.target.value
       }
   });
   };
-
   const handlePhoneChange = (e, index) => {
-    const updatedOrders = [...orders]; 
-    updatedOrders[index].phoneNumber = e.target.value; 
-    setOrders(updatedOrders);
-    setModifiedOrders({
-      ...modifiedOrders,
-      [updatedOrders[index].id]: {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].phoneNumber = e.target.value; 
+    setUsers(updatedUsers);
+    setModifiedUsers({
+      ...modifiedUsers,
+      [updatedUsers[index].id]: {
           phoneNumber: e.target.value
       }
   });
   };
+  const handleRoleChange = (e, index) => {
+    const updatedUsers = [...users]; 
+    updatedUsers[index].role = e.target.value; 
+    setUsers(updatedUsers);
+    
+    const Id = updatedUsers[index].id;
+    const Role = e.target.value;
+    
+    console.log('Változás történt:', { id: Id, role: Role }); 
+    setModifiedId(Id);
+    setModifiedRole(Role);
+    
+  };
 
   const handleUploadClick = () => {
-    Object.keys(modifiedOrders).forEach(id => {
-        handlePut(id, modifiedOrders[id]);
+    Object.keys(modifiedUsers).forEach(id => {
+      handlePut(id, modifiedUsers[id]); 
+      
     });
-    // Töröld a módosításokat az állapotból
-    setModifiedOrders({});
-};
+    setModifiedUsers({}); // Módosítások törlése az állapotból
+  };
 
-const handleCheckboxChange = (userId) => {
+  const handleCheckboxChange = (userId) => {
   const selectedIndex = selectedUsers.indexOf(userId);
   if (selectedIndex === -1) {
     setSelectedUsers([...selectedUsers, userId]); // Ha nincs még kiválasztva, hozzáadja a tömbhöz
@@ -253,75 +355,121 @@ const handleCheckboxChange = (userId) => {
     updatedUsers.splice(selectedIndex, 1); // Kiválasztás megszüntetése
     setSelectedUsers(updatedUsers);
   }
-};
+  };
 
-// Kiválasztott felhasználók törlése gomb eseménykezelője
-const handleDeleteSelectedUsers = async () => {
-  try {
-    // A kiválasztott felhasználók törlése
-    await Promise.all(selectedUsers.map(async (userId) => {
-      const response = await fetch(`https://localhost:7276/api/User/${userId}`, {
-        method: 'DELETE',
+  const handleDeleteSelectedUsers = async () => {
+    try {
+      // A kiválasztott felhasználók törlése
+      await Promise.all(selectedUsers.map(async (userId) => {
+        const response = await fetch(`https://localhost:7276/api/User/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error('A törlés sikertelen volt.');
+        }
+      }));
+      // Sikeres törlés esetén frissíthetjük a felhasználók listáját vagy más szükséges műveleteket végezhetünk
+      console.log('A kiválasztott felhasználók sikeresen törölve lettek.');
+    } catch (error) {
+      console.error('Hiba történt a törlés során:', error);
+      // Kezelhetjük a hibát a megfelelő módon
+    }
+  };
+  
+  const isSelected = (userId) => {
+    return selectedUsers.includes(userId);
+  };
+
+  const handleAddNew = () => {
+    setShowNewTable(true);
+  };
+  const handleNewRecordChange = (e, field) => {
+    setNewRecord({
+      ...newRecord,
+      [field]: e.target.value
+    });
+  };
+  
+  const handleAddNewUser = async () => {
+    try {
+      const response = await fetch(`https://localhost:7276/api/User`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(newRecord),
       });
+      
       if (!response.ok) {
-        throw new Error('A törlés sikertelen volt.');
+        throw new Error('Network response was not ok');
       }
-    }));
-    // Sikeres törlés esetén frissíthetjük a felhasználók listáját vagy más szükséges műveleteket végezhetünk
-    console.log('A kiválasztott felhasználók sikeresen törölve lettek.');
-  } catch (error) {
-    console.error('Hiba történt a törlés során:', error);
-    // Kezelhetjük a hibát a megfelelő módon
-  }
-};
+      
+      const data = await response.json();
+      console.log('New user added:', data);
+  
+      // Most hívjuk meg a jogosultság hozzáadását
+      handleAddNewUserRole(newRoleRecord);
+  
+      // Állapotok frissítése, például:
+      // setNewRecord({}); // Új felhasználó adatainak ürítése
+      // setShowNewTable(false); // Az új felhasználók táblázat elrejtése
+      // Frissíthetjük az összes felhasználó adatait is
+    } catch (error) {
+      console.error('Add new user error:', error);
+    }
+  };
+  
+  const handleAddNewUserRole = () => {
+    console.log(newRecord.newRole, newRecord.email)
+    fetch(`https://localhost:7276/auth/AssignRole`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        "role": `${newRecord.newRole}`,
+      "email": `${newRecord.email}`
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update user role'); 
+      }
+      console.log('User role updated successfully');
+      // Esetleges további műveletek...
+    })
+    .catch(error => {
+      console.error('Error updating user role:', error);
+    });
+  };
 
-// Ellenőrzi, hogy egy adott sor kiválasztva van-e
-const isSelected = (userId) => {
-  return selectedUsers.includes(userId);
-};
-
-const handleAddNew = () => {
-  setShowNewTable(true);
-};
-
-const handleNewRecordChange = (e, field) => {
-  setNewRecord({
-    ...newRecord,
-    [field]: e.target.value
-  });
-};
-
-const handleAddNewUser = () => {
+  const handlePutStatus = () => {
   fetch(`https://localhost:7276/api/User`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(newRecord, console.log(newRecord)),
-  })
-    .then((response) => {
+      method: 'Put',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       return response.json();
     })
-    .then((data) => {
-      console.log('New user added:', data);
-      // Állapotok frissítése, például:
-      // setNewRecord({}); // Új felhasználó adatainak ürítése
-      // setShowNewTable(false); // Az új felhasználók táblázat elrejtése
-      // Frissíthetjük az összes felhasználó adatait is
+    .then(data => {
+      console.log(data)
+      setOrders(data);
     })
-    .catch((error) => {
-      console.error('Add new user error:', error);
-    });
-};
-
-
-
+    .catch(error => {
+      console.error('Fetch error:', error);
+    }); 
+  };
+  
   return(
   <div>
     <div>
@@ -373,26 +521,28 @@ const handleAddNewUser = () => {
     </div>
   <div>  
     <ResponsiveContainer> 
+      <ResponsiveRow>
       <div className="admin-form" style={{borderLeft: '5px solid black' }}>             
-        <div>
-        {/* Új Navbar az űrlap felett */}
-          <Navbar expand="lg" variant="dark" style={{borderRadius: '45px 50px 0 0'}}>                        
-            <Navbar.Toggle style={{marginLeft: '25px'}} aria-controls="basic-navbar-nav" />                  
-            <Navbar.Collapse style={{marginLeft: '25px'}} id="basic-navbar-nav">
-            <Nav variant="tabs" defaultActiveKey="orders">
-              <Nav.Item>
-                <Nav.Link style={{color: 'green'}} eventKey="orders" onClick={() => setActiveTab('orders')}>Rendelések</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link style={{color: 'green'}} eventKey="users" onClick={() => { setActiveTab('users'); clearFilters(); }}>Felhasználók</Nav.Link>
-              </Nav.Item>
-            </Nav>
-            </Navbar.Collapse>
-          </Navbar>        
-        </div> 
+          <ResponsiveRow>      
+            <Navbar expand="lg" variant="dark" style={{borderRadius: '45px 50px 0 0'}}>                        
+              <Navbar.Toggle style={{marginLeft: '25px'}} aria-controls="basic-navbar-nav" />                  
+              <Navbar.Collapse style={{marginLeft: '25px'}} id="basic-navbar-nav">
+              <Nav variant="tabs" defaultActiveKey="orders">
+                <Nav.Item>
+                  <Nav.Link style={{color: 'green'}} eventKey="orders" onClick={() => setActiveTab('orders')}>Rendelések</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link style={{color: 'green'}} eventKey="users" onClick={() => { setActiveTab('users'); clearFilters(); }}>Felhasználók</Nav.Link>
+                </Nav.Item>
+              </Nav>
+              </Navbar.Collapse>
+            </Navbar>        
+          </ResponsiveRow>   
+
+        
         {activeTab === 'orders' && (
         <div>
-        <Form style={{marginLeft: '1%'}}>
+        <Form>
           <ResponsiveRow>
             <Form.Group  style={{width: '15%'}} controlId="formName">
               <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
@@ -416,14 +566,14 @@ const handleAddNewUser = () => {
             style={{
               width: '15%',
               height: '1%', 
-              marginTop: '2.9%', 
+              marginTop: '2.3%', 
               borderRadius: '15%', 
               backgroundColor: 'greenyellow' }}>
               Lekérdezés
             </button>
           </ResponsiveRow>
-          <div className="table-container">
-          <Table  style={{width: '99%',marginTop: '1%'}} striped bordered hover>
+          <div>
+          <Table style={{marginTop: '1%'}} striped bordered hover>
             <thead>
               <tr>
                 <th>#</th>
@@ -460,7 +610,7 @@ const handleAddNewUser = () => {
                   <td>{order.purchasePostalCode}</td>
                   <td>{order.purchaseEmail}</td>      
                   <td>{order.purchaseDate}</td>
-                  <td>{order.status}</td> 
+                  <td>{order.orderStatus}</td> 
                   <td>{order.merchantType}</td> 
                   <td>{order.merchantSerialName}</td> 
                   <td>{order.merchantQuantity}</td>
@@ -473,9 +623,12 @@ const handleAddNewUser = () => {
         </Form> 
         </div> 
         )} 
+        
+        
+        
         {activeTab === 'users' && (
         <div>
-          <Form style={{marginLeft: '1%'}}>
+          <Form>
           <ResponsiveRow>
             <Form.Group  style={{width: '15%'}} controlId="formName">
               <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
@@ -490,7 +643,7 @@ const handleAddNewUser = () => {
             <button 
             type='button'
             className='filter-button'
-            onClick={getAllOrders}
+            onClick={getAllUsers}
             style={{
               width: '15%',
               height: '1%', 
@@ -519,6 +672,8 @@ const handleAddNewUser = () => {
               onClick={() => {
                 handleUploadClick();
                 handleAddNewUser();
+                HandlePutRole(modifiedId, modifiedRole);
+               
               }}
               style={{
                 width: '15%',
@@ -543,7 +698,7 @@ const handleAddNewUser = () => {
             </button>
             
           </ResponsiveRow>
-          <div className="table-container"   style={{width: '99%'}}>
+          <div> 
           <Table  style={{marginTop: '1%'}} striped bordered hover>
             <thead>
               <tr>
@@ -555,81 +710,83 @@ const handleAddNewUser = () => {
                 <th>Kor</th>
                 <th>Jelszó</th>
                 <th>Telefonszám</th>
+                <th>Jogosultság</th>
               </tr>
             </thead>
             <tbody>
-            {orders && orders
-              .filter(order => 
-                (nameFilter === '' || (order.fullName && order.fullName.includes(nameFilter))) &&
-                (emailFilter === '' || (order.purchaseEmail && order.purchaseEmail.includes(emailFilter))) &&
-                (dateFilter === '' || (order.purchaseDate && order.purchaseDate.includes(dateFilter)))
+            {users && users
+              .filter(user => 
+                (nameFilter === '' || (user.fullName && user.fullName.includes(nameFilter))) &&
+                (emailFilter === '' || (user.purchaseEmail && user.purchaseEmail.includes(emailFilter))) &&
+                (dateFilter === '' || (user.purchaseDate && user.purchaseDate.includes(dateFilter)))
               )
-              .map((order, index) => (
+              .map((user, index) => (
                 <tr key={index}>
                   <td>{index + 1}
                   <input
+                    style={{float: 'right'}}
                     type="checkbox"
-                    onChange={() => handleCheckboxChange(order.id)} // Ide írd a kiválasztás kezelőjét
-                    checked={isSelected(order.id)} // Ide írd a kiválasztás állapotának ellenőrzését
+                    onChange={() => handleCheckboxChange(user.id)} // Ide írd a kiválasztás kezelőjét
+                    checked={isSelected(user.id)} // Ide írd a kiválasztás állapotának ellenőrzését
                   />
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
-                    {order.id}
+                    {user.id}
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
                     {editingIndex === index ? (
                       <input
                         type="text"
-                        value={order.fullName}
+                        value={user.fullName}
                         onChange={(e) => handleNameChange(e, index)}
                       />
                     ) : (
-                      order.fullName
+                      user.fullName
                     )}
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
                     {editingIndex === index ? (
                       <input
                         type="text"
-                        value={order.userName}
+                        value={user.userName}
                         onChange={(e) => handleUserNameChange(e, index)}
                       />
                     ) : (
-                      order.userName
+                      user.userName
                     )}
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
                     {editingIndex === index ? (
                       <input
                         type="text"
-                        value={order.email}
+                        value={user.email}
                         onChange={(e) => handleEmailChange(e, index)}
                       />
                     ) : (
-                      order.email
+                      user.email
                     )}
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
                     {editingIndex === index ? (
                       <input
                         type="text"
-                        value={order.age}
+                        value={user.age}
                         onChange={(e) => handleAgeChange(e, index)}
                       />
                     ) : (
-                      order.age
+                      user.age
                     )}
                   </td>
                   <td onClick={() => setEditingIndex(index)}>
-                    <div style={{ maxWidth: '400px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <div>
                       {editingIndex === index ? (
                         <input                  
-                          type="text"
-                          value={order.passwordHash}
+                          type="password"
+                          value={user.passwordHash.slice(0, 10)}
                           onChange={(e) => handlePasswordChange(e, index)}
                         />
                       ) : (
-                        order.passwordHash
+                        "*".repeat(user.passwordHash.slice(0, 10).length) 
                       )}
                     </div>
                   </td>
@@ -637,20 +794,33 @@ const handleAddNewUser = () => {
                     {editingIndex === index ? (
                       <input
                         type="text"
-                        value={order.phoneNumber}
+                        value={user.phoneNumber}
                         onChange={(e) => handlePhoneChange(e, index)}
                       />
                     ) : (
-                      order.phoneNumber
+                      user.phoneNumber
                     )}
-                  </td>                            
+                  </td> 
+                  <td onClick={() => setEditingIndex(index)}>
+                    {editingIndex === index ? (
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(e, index)}
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                      </select>
+                    ) : (
+                      user.role
+                    )}
+                  </td>                           
                 </tr>           
             ))} 
             </tbody>
               </Table>
               {showNewTable && (
               <div className="table-container">
-                <Table style={{ width: '100%', marginTop: '1%' }} striped bordered hover>
+                <Table striped bordered hover>
                   <thead>
                     <tr>
                       <th>#</th>
@@ -660,6 +830,16 @@ const handleAddNewUser = () => {
                       <th>Kor</th>
                       <th>Jelszó</th>
                       <th>Telefonszám</th>
+                      <th>Jogosultság
+                      <button onClick={() => setShowNewTable(false)} 
+                        style={{
+                          color: 'red',
+                          float: 'right',
+                          background: 'none',
+                          border: 'none' }}>
+                        <FaTimes />
+                      </button>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -701,6 +881,15 @@ const handleAddNewUser = () => {
                           onChange={(e) => handleNewRecordChange(e, 'phoneNumber')}
                         />
                       </td>
+                      <td>
+                      <select
+                        value={newRecord.newRole}
+                        onChange={(e) => handleNewRecordChange(e, 'newRole')}
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                      </select>
+                      </td>
                     </tr>
                   </tbody>
                 </Table>
@@ -709,8 +898,9 @@ const handleAddNewUser = () => {
           </div>      
         </Form> 
         </div>
-      )}       
+      )}      
       </div>
+      </ResponsiveRow>
     </ResponsiveContainer>
    </div>
 </div>  
