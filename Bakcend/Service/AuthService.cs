@@ -3,7 +3,9 @@ using Bakcend.Models;
 using Bakcend.Models.DTO;
 using Bakcend.Service.IAuth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SendGrid.Helpers.Mail;
 
 namespace Bakcend.Service
 {
@@ -21,6 +23,7 @@ namespace Bakcend.Service
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.jwtTokenGenerator = jwtTokenGenerator;
+            
         }
 
         public async Task<bool> AssignRole(string email, string roleName)
@@ -34,7 +37,7 @@ namespace Bakcend.Service
                     //Itt készülnek a Role-ok
                     roleManager.CreateAsync(new IdentityRole(roleName)).GetAwaiter().GetResult();
                 }
-
+                await userManager.UpdateSecurityStampAsync(user);
                 await userManager.AddToRoleAsync(user, roleName);
 
                 return true;
@@ -43,6 +46,56 @@ namespace Bakcend.Service
             return false;
 
         }
+
+        public async Task<bool> AssignPutRole(string userId, string newRole)
+        {
+            // Felhasználó keresése az azonosító alapján
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user != null)
+            {
+                // Ellenőrizze, hogy a szerep létezik-e, ha nem, akkor létrehozza
+                if (!await roleManager.RoleExistsAsync(newRole))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(newRole));
+                }
+
+                // Felhasználó szerepeinek frissítése
+                var currentRoles = await userManager.GetRolesAsync(user);
+                await userManager.RemoveFromRolesAsync(user, currentRoles.ToArray());
+                await userManager.AddToRoleAsync(user, newRole);
+
+                return true; // Sikeres frissítés esetén
+            }
+
+            return false; // Ha a felhasználó nem található
+        }
+
+
+
+
+
+
+        public async Task<IEnumerable<UserRoleDto>> GetRolesForAllUsers()
+        {
+            var usersWithRoles = new List<UserRoleDto>();
+
+            var users = await userManager.Users.ToListAsync();
+
+            foreach (var user in users)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                var userWithRoles = new UserRoleDto
+                {
+                    UserId = user.Id,
+                    Roles = roles.ToList()
+                };
+                usersWithRoles.Add(userWithRoles);
+            }
+
+            return usersWithRoles;
+        }
+
 
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {

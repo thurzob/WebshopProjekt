@@ -8,9 +8,16 @@ using System.Net.Mail;
 using System.Net;
 using SendGrid.Helpers.Mail;
 using SendGrid;
+using Microsoft.EntityFrameworkCore;
+using Bakcend.Data;
+using Bakcend.Models;
+using Microsoft.AspNetCore.Identity;
+using Bakcend.Service;
 
 namespace Auth.Controllers
 {
+
+
 
 
 
@@ -21,11 +28,17 @@ namespace Auth.Controllers
         private readonly IAuthService authService;
         private readonly string outlookEmailAddress = "bence.thurzo@outlook.hu"; // Gmail címed
         private readonly string outlookEmailPassword = "Fundango980123"; // Gmail jelszavad
-
+        
         public AuthController(IAuthService authService)
         {
             this.authService = authService;
         }
+        
+
+        // Replace MyContext with your actual DbContext class name
+
+
+
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterRequestDto registerRequestDto)
@@ -53,6 +66,34 @@ namespace Auth.Controllers
 
 
             return StatusCode(200, "Sikeres szerep létrehozás.");
+        }
+
+        [HttpPut("assignPutRole")]
+        public async Task<IActionResult> AssignPutRole([FromBody] UserRolePutDto userRolePutDto)
+        {
+            var assignRoleSuccesful = await authService.AssignPutRole(userRolePutDto.UserId, userRolePutDto.NewRole);
+            if (!assignRoleSuccesful)
+            {
+                return BadRequest();
+            }
+
+
+            return StatusCode(200, "Sikeres szerep változtatás.");
+        }
+
+
+
+        [HttpGet("GetRoles")]
+        public async Task<ActionResult<IEnumerable<UserRoleDto>>> GetRoles()
+        {
+            var usersWithRoles = await authService.GetRolesForAllUsers();
+
+            if (usersWithRoles == null || !usersWithRoles.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(usersWithRoles);
         }
 
         [HttpPost("login")]
