@@ -191,9 +191,36 @@ function Order() {
             UserId: storedUserId 
           });
         });
-      
-    
-    }
+        const userId = localStorage.getItem('userId');
+        console.log('id:' + userId)
+        fetch(`https://localhost:7276/api/User/${userId}/CreateOrderStatus`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+                // Egyéb szükséges fejlécek
+          },
+          body: JSON.stringify({ OrderStatus: 'Megrendelés alatt', id: userId })
+          
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log(data);
+              
+              
+          })
+          .catch(error => {
+              console.error('Fetch error:', error);
+              // Állapot nullázása hiba esetén
+          });
+            
+          }
     
 
   };
@@ -292,7 +319,17 @@ function Order() {
                     <Form.Control name='phoneNumber' style={{}} type="tel" placeholder="Add meg a telefonszámot"/>
                     </Form.Group>
 
-                    <button  style={{width: '100%',backgroundColor: 'Green', color: 'white', height: '50px', borderRadius: '50px', marginBottom: ' 15px'}}>Megrendelés</button>
+                    <button  
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'Green',
+                      color: 'white',
+                      height: '50px',
+                      borderRadius: '50px',
+                      marginBottom: ' 15px'
+                      }}>
+                      Megrendelés
+                      </button>
                     <div>
                     <Link to="/Home">
                       <button
@@ -319,7 +356,6 @@ function Order() {
                           color: 'white',                         
                           height: '50px',
                           borderRadius: '50px',
-
                         }}
                       >
                         Vissza

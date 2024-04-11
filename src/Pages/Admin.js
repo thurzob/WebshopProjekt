@@ -53,6 +53,7 @@ function Admin()
   const [modifiedId, setModifiedId] = useState('');
   const [modifiedRole, setModifiedRole] = useState('');
   const [newRoleRecord, setNewRoleRecord] = useState('');
+  const [editingData, setEditingData] = useState(-1);
   const [newRecord, setNewRecord] = useState({
     id: '',
     fullName: '',
@@ -446,14 +447,29 @@ function Admin()
     });
   };
 
-  const handlePutStatus = () => {
-  fetch(`https://localhost:7276/api/User`, {
-      method: 'Put',
+  const handlePutOrders = () => {
+    
+    const modifiedOrders = orders.filter(order => order.modified);
+  
+    const modifiedData = modifiedOrders.map(order => ({
+      userId: order.id, 
+      billingName: order.purchaseBillingName,
+      billingAddress: order.purchaseBillingAddress,
+      billingPostalCode: order.purchaseBillingPostalCode,
+      deliveryAddress: order.purchasaeDeliveryAddress,
+      postalCode: order.purchasePostalCode,
+      email: order.purchaseEmail,
+      phoneNumber: order.purchasePhoneNumber,
+    }));
+  
+    fetch(`https://localhost:7276/api/User`, {
+      method: 'PUT',
       mode: 'cors',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(modifiedData)
     })
     .then(response => {
       if (!response.ok) {
@@ -463,11 +479,154 @@ function Admin()
     })
     .then(data => {
       console.log(data)
-      setOrders(data);
+      // Frissítsük az orders állapotot csak a módosított adatokkal
+      const updatedOrders = orders.map(order => {
+        if (order.modified) {
+          return data.find(updatedOrder => updatedOrder.id === order.id);
+        }
+        return order;
+      });
+      setOrders(updatedOrders);
     })
     .catch(error => {
       console.error('Fetch error:', error);
+      console.log(modifiedData)
     }); 
+  };
+  
+  const handlePutMerchants = () => {
+    // Összegyűjtjük az összes módosított kereskedő adatot
+    const modifiedMerchants = orders
+      .filter(order => order.modified)
+      .flatMap(order => order.merchants)
+      .filter(merchant => merchant.modified);
+  
+    const modifiedData = modifiedMerchants.map(merchant => ({
+      userId: merchant.id, 
+      type: merchant.type,
+      serialName: merchant.serialName,
+      quantity: merchant.quantity,
+      price: merchant.price,
+    }));
+  
+    fetch(`https://localhost:7276/api/Merchant`, {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(modifiedData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data);
+      // Frissítsük az orders állapotot csak a módosított adatokkal
+      const updatedOrders = orders.map(order => {
+        const modifiedMerchants = order.merchants.map(merchant => {
+          const updatedMerchant = data.find(updatedMerchant => updatedMerchant.id === merchant.id);
+          if (updatedMerchant) {
+            return updatedMerchant;
+          }
+          return merchant;
+        });
+        return { ...order, merchants: modifiedMerchants };
+      });
+      setOrders(updatedOrders);
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      console.log(modifiedData);
+    });
+  };
+
+  const handleBillingNameChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchaseBillingName = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleBillingAddressChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchaseBillingAddress = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleBillingPostalCodeChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchaseBillingPostalCode = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleDeliveryAddressChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchasaeDeliveryAddress = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handlePostalCodeChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchasePostalCode = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handlePurchaseEmailChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchaseEmail = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handlePurchasePhoneNumberChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].purchasePhoneNumber = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+
+  const handleOrderStatusChange = (value, index) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].orderStatus = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleMerchantTypeChange = (value, index, merchantIndex) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].merchants[merchantIndex].type = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleMerchantSerialNameChange = (value, index, merchantIndex) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].merchants[merchantIndex].serialName = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleMerchantQuantityChange = (value, index, merchantIndex) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].merchants[merchantIndex].quantity = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
+  };
+  
+  const handleMerchantPriceChange = (value, index, merchantIndex) => {
+    const updatedOrders = [...orders];
+    updatedOrders[index].merchants[merchantIndex].price = value;
+    updatedOrders[index].modified = true;
+    setOrders(updatedOrders);
   };
   
   return(
@@ -571,6 +730,19 @@ function Admin()
               backgroundColor: 'greenyellow' }}>
               Lekérdezés
             </button>
+
+            <button 
+            type='button'
+            className='filter-button'
+            onClick={handlePutOrders}
+            style={{
+              width: '15%',
+              height: '1%', 
+              marginTop: '2.3%', 
+              borderRadius: '15%', 
+              backgroundColor: 'greenyellow' }}>
+              Módosítás
+            </button>
           </ResponsiveRow>
           <div>
           <Table style={{marginTop: '1%'}} striped bordered hover>
@@ -584,6 +756,7 @@ function Admin()
                 <th>Szállítási cím</th>
                 <th>Szállítási cím irányítószám</th>
                 <th>Email</th>
+                <th>Telefonszám</th>
                 <th>Rendelés dátuma</th>
                 <th>Rendelés státusza</th>
                 <th>Termék típusa</th>
@@ -594,38 +767,191 @@ function Admin()
             </thead>
             <tbody>
             {orders && orders
-              .filter(order => 
-                (nameFilter === '' || (order.fullName && order.fullName.includes(nameFilter))) &&
-                (emailFilter === '' || (order.purchaseEmail && order.purchaseEmail.includes(emailFilter))) &&
-                (dateFilter === '' || (order.purchaseDate && order.purchaseDate.includes(dateFilter)))
-              )
-              .map((order, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{order.fullName}</td>
-                  <td>{order.purchaseBillingName}</td>
-                  <td>{order.purchaseBillingAddress}</td>
-                  <td>{order.purchaseBillingPostalCode}</td>
-                  <td>{order.purchasaeDeliveryAddress}</td>
-                  <td>{order.purchasePostalCode}</td>
-                  <td>{order.purchaseEmail}</td>      
-                  <td>{order.purchaseDate}</td>
-                  <td>{order.orderStatus}</td> 
-                  <td>{order.merchantType}</td> 
-                  <td>{order.merchantSerialName}</td> 
-                  <td>{order.merchantQuantity}</td>
-                  <td>{order.merchantPrice}</td>
-                </tr>
-            ))}
+                .filter(order => 
+                  (nameFilter === '' || (order.fullName && order.fullName.includes(nameFilter))) &&
+                  (emailFilter === '' || (order.purchaseEmail && order.purchaseEmail.includes(emailFilter))) &&
+                  (dateFilter === '' || (order.purchaseDate && order.purchaseDate.includes(dateFilter)))
+                )
+                .map((order, index) => (
+                  <React.Fragment key={index}>
+                    {/* Elválasztó vonal minden új felhasználóhoz */}
+                    {index !== 0 && orders[index - 1].purchaseEmail !== order.purchaseEmail && (
+                      <tr key={`separator-${index}`}>
+                        <td colSpan="15" style={{ borderBottom: "2px solid black" }}></td>
+                      </tr>
+                    )}
+
+                    {/* Azonos felhasználóhoz tartozó rendelések */}
+                    {order.merchants.map((merchant, merchantIndex) => (
+                      <tr key={`${index}-${merchantIndex}`}>
+                        <td>{index + 1}</td>
+                        <td> {order.fullName}</td>
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchaseBillingName}
+                              onChange={(e) => handleBillingNameChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchaseBillingName
+                          )}
+                        </td>
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchaseBillingAddress}
+                              onChange={(e) => handleBillingAddressChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchaseBillingAddress
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchaseBillingPostalCode}
+                              onChange={(e) => handleBillingPostalCodeChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchaseBillingPostalCode
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchasaeDeliveryAddress}
+                              onChange={(e) => handleDeliveryAddressChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchasaeDeliveryAddress
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchasePostalCode}
+                              onChange={(e) => handlePostalCodeChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchasePostalCode
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchaseEmail}
+                              onChange={(e) => handlePurchaseEmailChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchaseEmail
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.purchasePhoneNumber}
+                              onChange={(e) => handlePurchasePhoneNumberChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.purchasePhoneNumber
+                          )}
+                        </td>
+
+                        <td>{order.purchaseDate}</td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={order.orderStatus}
+                              onChange={(e) => handleOrderStatusChange(e.target.value, index)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            order.orderStatus
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={merchant.type}
+                              onChange={(e) => handleMerchantTypeChange(e.target.value, index, merchant)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            merchant.type
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={merchant.serialName}
+                              onChange={(e) => handleMerchantSerialNameChange(e.target.value, index, merchant)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            merchant.serialName
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={merchant.quantity}
+                              onChange={(e) => handleMerchantQuantityChange(e.target.value, index, merchant)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            merchant.quantity
+                          )}
+                        </td>
+
+                        <td onClick={() => setEditingIndex(index)}>
+                          {editingIndex === index ? (
+                            <input
+                              type="text"
+                              value={merchant.price}
+                              onChange={(e) => handleMerchantPriceChange(e.target.value, index, merchant)}
+                              style={{width: '100%'}}
+                            />
+                          ) : (
+                            merchant.price
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
             </tbody>
           </Table>
           </div>      
         </Form> 
         </div> 
         )} 
-        
-        
-        
         {activeTab === 'users' && (
         <div>
           <Form>
