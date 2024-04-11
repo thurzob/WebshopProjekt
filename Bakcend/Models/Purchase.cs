@@ -25,5 +25,5 @@ public partial class Purchase
 
     public DateTime Date { get; set; }
 
-    public virtual Aspnetuser User { get; set; } = null!;
+    public virtual Aspnetuser? User { get; set; }
 }

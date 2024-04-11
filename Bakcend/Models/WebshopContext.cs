@@ -44,7 +44,7 @@ public partial class WebshopContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=localhost;database=Webshop;user=root;sslmode=none", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.32-mariadb"));
+        => optionsBuilder.UseMySql("server=localhost;database=webshop;user=root;sslmode=none", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.4.32-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -95,6 +95,7 @@ public partial class WebshopContext : DbContext
             entity.Property(e => e.LockoutEnd).HasMaxLength(6);
             entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
             entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
+            entity.Property(e => e.OrderStatus).HasMaxLength(255);
             entity.Property(e => e.UserName).HasMaxLength(256);
 
             entity.HasMany(d => d.Roles).WithMany(p => p.Users)
@@ -231,10 +232,6 @@ public partial class WebshopContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(255);
             entity.Property(e => e.PostalCode).HasMaxLength(255);
-
-            entity.HasOne(d => d.User).WithMany(p => p.Purchases)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("purchase_ibfk_1");
         });
 
         modelBuilder.Entity<Storage>(entity =>

@@ -34,6 +34,8 @@ namespace Bakcend.Controllers
                 Age = createUserDto.Age,
                 PasswordHash = HashPassword(createUserDto.PasswordHash),              
                 PhoneNumber = createUserDto.PhoneNumber,
+                OrderStatus = createUserDto.OrderStatus,
+                
 
 
             };
@@ -53,6 +55,44 @@ namespace Bakcend.Controllers
 
             }
         }
+
+        [HttpPost("{id}/CreateOrderStatus")]
+public ActionResult CreateOrderStatus(string id, [FromBody] CreateOrderStatusDto createOrderStatusDto)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    using (var context = new WebshopContext())
+    {
+        var existingUser = context.Aspnetusers.FirstOrDefault(aspnetuser => aspnetuser.Id == id);
+
+        if (existingUser != null)
+        {
+            // Létrehozzuk az új OrderStatus rekordot és hozzáadjuk a felhasználóhoz
+            existingUser.OrderStatus = createOrderStatusDto.OrderStatus;
+
+            try
+            {
+                context.SaveChanges();
+                return Ok(new
+                {
+                    Message = "Sikeresen létrehozva az OrderStatus!",
+                    CreatedOrderStatus = existingUser.OrderStatus
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { Message = "Hiba történt a létrehozás közben." });
+            }
+        }
+        else
+        {
+            return NotFound();
+        }
+    }
+}
 
 
 
@@ -110,17 +150,17 @@ namespace Bakcend.Controllers
                             Email = userWithMerchantAndPurchase.Email,
                             PasswordHash = userWithMerchantAndPurchase.PasswordHash,
                             PhoneNumber = userWithMerchantAndPurchase.PhoneNumber,
-                            // Itt töltsd ki a többi felhasználóhoz tartozó adatot
-                            // ...
+                            OrderStatus = userWithMerchantAndPurchase.OrderStatus,
 
-                            // Merchant adatok
-                                                 
-                            MerchantType = userWithMerchantAndPurchase.Merchants?.FirstOrDefault()?.Type,
-                            MerchantSerialName = userWithMerchantAndPurchase.Merchants?.FirstOrDefault()?.SerialName,
-                            MerchantPrice = (int)(userWithMerchantAndPurchase.Merchants?.FirstOrDefault()?.Price ?? 0),
-                            MerchantQuantity = (int)(userWithMerchantAndPurchase.Merchants?.FirstOrDefault()?.Quantity ?? 0),
-                            MerchantProductId = (int)(userWithMerchantAndPurchase.Merchants?.FirstOrDefault()?.ProductId ?? 0),
-
+                            Merchants = userWithMerchantAndPurchase.Merchants.Select(m => new MerchantDto
+                            {
+                                Type = m.Type,
+                                SerialName = m.SerialName,
+                                Price = (int)m.Price,
+                                Quantity = (int)m.Quantity,
+                                ProductId = (int)m.ProductId,
+                                // Itt töltsd ki a többi merchant adatot
+                            }).ToList(),
                             // Itt töltsd ki a többi merchant adatot
                             // ...
 
@@ -172,6 +212,32 @@ namespace Bakcend.Controllers
                 }
             }
         }
+
+        [HttpPut]
+        public ActionResult Put(string id, UpdateStatusDto updateStatusDto)
+        {
+            using (var context = new WebshopContext())
+            {
+                var existingOrderStatus = context.Aspnetusers.FirstOrDefault(aspnetuser => aspnetuser.Id == id);
+
+                if (existingOrderStatus != null)
+                {
+                    existingOrderStatus.OrderStatus = updateStatusDto.OrderStatus;
+
+                    context.Aspnetusers.Update(existingOrderStatus);
+                    context.SaveChanges();
+
+                    return Ok(200);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+        }
+
+
         [HttpPatch("{id}")]
         public ActionResult Patch(string id, UpdateUserDto updateUserDto)
         {
@@ -201,17 +267,14 @@ namespace Bakcend.Controllers
 
                     if (updateUserDto.PhoneNumber != null)
                         existingUser.PhoneNumber = updateUserDto.PhoneNumber;
-
-                    // Ha a jelszó meg van adva a CreateUserDto-ban, akkor hasheljük azt
+                    
                     if (updateUserDto.PasswordHash != null)
                     {
-                        // Hasheljük a jelszót, mielőtt elmentenénk
                         existingUser.PasswordHash = HashPassword(updateUserDto.PasswordHash);
                     }
 
-                    // További mezők frissítése...
+                    
 
-                    // Az adatbázisban való frissítés tranzakcióban
                     using (var transaction = context.Database.BeginTransaction())
                     {
                         try

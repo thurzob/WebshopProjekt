@@ -9,16 +9,14 @@
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string PhoneNumber { get; set; }
-        
+        public string OrderStatus { get; set; }
+
+        public List<MerchantDto> Merchants { get; set; }
 
 
 
 
-        public string MerchantType { get; set;}
-        public string MerchantSerialName { get; set; }
-        public int MerchantPrice { get; set; }
-        public int MerchantProductId { get; set; }
-        public int MerchantQuantity { get; set; }
+       
 
 
         
@@ -33,4 +31,15 @@
         public DateTime PurchaseDate { get; set; }
         
     }
+
+    public class MerchantDto
+    {
+        public string Type { get; set; }
+        public string SerialName { get; set; }
+        public int Price { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
+        // Itt töltsd ki a többi merchant adatot
+    }
+
 }

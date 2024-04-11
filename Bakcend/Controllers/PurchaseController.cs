@@ -18,8 +18,6 @@ namespace Bakcend.Controllers
     [ApiController]
     public class PurchaseController : ControllerBase
     {
-
-
         [HttpPost]
         public ActionResult Post(CreatePurchaseDto createPurchaseDto)
         {
@@ -56,6 +54,40 @@ namespace Bakcend.Controllers
                     return Ok(purchase);
                 }
 
+            }
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Put(int id, UpdatePurchaseDto updatePurchaseDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            using (var context = new WebshopContext())
+            {
+                var purchase = context.Purchases.FirstOrDefault(p => p.Id == id);
+
+                if (purchase == null)
+                {
+                    return NotFound();
+                }
+
+                // Frissítjük a vásárlás adatait az új adatokkal
+                purchase.BillingName = updatePurchaseDto.BillingName;
+                purchase.BillingPostalCode = updatePurchaseDto.BillingPostalCode;
+                purchase.BillingAddress = updatePurchaseDto.BillingAddress;
+                purchase.Email = updatePurchaseDto.Email;
+                purchase.PostalCode = updatePurchaseDto.PostalCode;
+                purchase.DeliveryAddress = updatePurchaseDto.DeliveryAddress;
+                purchase.PhoneNumber = updatePurchaseDto.PhoneNumber;
+                purchase.UserId = updatePurchaseDto.UserId;
+                
+                // További adatok frissítése...
+
+                context.SaveChanges();
+                return Ok(purchase);
             }
         }
 
