@@ -89,6 +89,7 @@ function Order() {
     }
   }, [userId]);
 
+ 
   
 
   const handleOrder = (event) => {
@@ -103,94 +104,93 @@ function Order() {
       const deliveryAddress = formData.get('deliveryAddress');
       const phoneNumber = formData.get('phoneNumber');
       const storedUserId = localStorage.getItem('userId');
-      
+      let postData= [];
 
-      fetch('https://localhost:7276/api/Purchase', {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            billingName,
-            billingPostalCode,
-            billingAddress,
-            email,
-            postalCode,
-            deliveryAddress,
-            phoneNumber,
-            UserId: storedUserId
-          })
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log(data); // sikeres válasz naplózása a konzolon
-          // további teendők a sikeres válasz esetén
-          
-          cartItems.forEach(item => {
-            fetch('https://localhost:7276/api/Merchant', {
-              method: 'POST',
-              mode: 'cors',
-              headers: {
+     
+      cartItems.forEach(item => {
+        fetch('https://localhost:7276/api/Merchant', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
+            },
+            body: JSON.stringify({
                 UserId: storedUserId,
                 serialName: item.serialName,
                 type: item.type,
                 price: item.price,
                 productId: item.productId,
                 quantity: item.quantity
-              })
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Szerver válasza:', data); 
+            const responseData = data;
+            
+            return fetch('https://localhost:7276/api/Purchase', {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "billingName": billingName,
+                   "billingPostalCode": billingPostalCode,
+                   "billingAddress": billingAddress,
+                    "email": email,
+                   "postalCode": postalCode,
+                   "deliveryAddress": deliveryAddress,
+                   "phoneNumber": phoneNumber,
+                   "tidid": responseData,
+                    UserId: storedUserId
+                })
             })
             .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.json();
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
             })
             .then(data => {
-              console.log(data); // sikeres válasz naplózása a konzolon
-              // további teendők a sikeres válasz esetén
-              clearCart();
+                // Ide kerülhet a második fetch válaszának kezelése, ha szükséges
             })
             .catch(error => {
-              console.error('Fetch error:', error); // hibaüzenet naplózása a konzolon
-              console.log('Elküldött adatok:', {
-                UserId: storedUserId,
-                serialName: item.serialName,
-                type: item.type,
-                price: item.price,
-                productId: item.productId,
-                quantity: item.quantity
-              });
+                console.error('Purchase API fetch error:', error); 
+                console.log(billingName,
+                  billingPostalCode,
+                  billingAddress,
+                  email,
+                  postalCode,
+                  deliveryAddress,
+                  phoneNumber,
+                  responseData,
+                  storedUserId)
             });
-          });
-      
-          setOrderSent(true);
-
-         
         })
         .catch(error => {
-          console.error('Fetch error:', error); // hibaüzenet naplózása a konzolon
-          console.log('Elküldött adatok:', {
-            billingName,
-            billingPostalCode,
-            billingAddress,
-            email,
-            postalCode,
-            deliveryAddress,
-            phoneNumber,
-            UserId: storedUserId 
-          });
+            console.error('Merchant API fetch error:', error); 
         });
+    
+        clearCart();
+    });
+        
+                 
+            
+                
+                
+               
+    
+        setOrderSent(true);
+
+     
         const userId = localStorage.getItem('userId');
         console.log('id:' + userId)
         fetch(`https://localhost:7276/api/User/${userId}/CreateOrderStatus`, {

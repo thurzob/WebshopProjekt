@@ -51,9 +51,17 @@ function Admin()
   const [users, setUsers] = useState([]);
   const [userRoles, setUserRoles] = useState({});
   const [modifiedId, setModifiedId] = useState('');
+  const [modifiedOrders, setModifiedOrders] = useState('')
   const [modifiedRole, setModifiedRole] = useState('');
   const [newRoleRecord, setNewRoleRecord] = useState('');
-  const [editingData, setEditingData] = useState(-1);
+  const [updatedBillingData, setUpdatedBillingData] = useState([]);
+  const [addedMerchantIds, setAddedMerchantIds] = useState([]);
+  const [displayedMerchantIds, setDisplayedMerchantIds] = useState([]);
+  const [ordersArray, setOrdersArray] = useState([]);
+  const [editingData, setEditingData] = useState(null);
+  const handleEditingStart = (index) => {
+    setEditingIndex(index);
+  };
   const [newRecord, setNewRecord] = useState({
     id: '',
     fullName: '',
@@ -102,7 +110,7 @@ function Admin()
       return response.json();
     })
     .then(data => {
-      console.log(data)
+      
       setOrders(data);
     })
     .catch(error => {
@@ -447,188 +455,85 @@ function Admin()
     });
   };
 
-  const handlePutOrders = () => {
+  
+
+
+  const handlePutOrderStatus = () => {
     
-    const modifiedOrders = orders.filter(order => order.modified);
-  
-    const modifiedData = modifiedOrders.map(order => ({
-      userId: order.id, 
-      billingName: order.purchaseBillingName,
-      billingAddress: order.purchaseBillingAddress,
-      billingPostalCode: order.purchaseBillingPostalCode,
-      deliveryAddress: order.purchasaeDeliveryAddress,
-      postalCode: order.purchasePostalCode,
-      email: order.purchaseEmail,
-      phoneNumber: order.purchasePhoneNumber,
-    }));
-  
-    fetch(`https://localhost:7276/api/User`, {
+    const url = `https://localhost:7276/api/User?id=${updatedBillingData.userId}`;
+    const orderStatusData = {
+      orderStatus: updatedBillingData.orderStatus
+    };
+    
+    fetch(url, { 
       method: 'PUT',
       mode: 'cors',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(modifiedData)
+      body: JSON.stringify(orderStatusData) 
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Hálózati válasz nem volt rendben');
       }
       return response.json();
     })
     .then(data => {
-      console.log(data)
-      // Frissítsük az orders állapotot csak a módosított adatokkal
-      const updatedOrders = orders.map(order => {
-        if (order.modified) {
-          return data.find(updatedOrder => updatedOrder.id === order.id);
-        }
-        return order;
-      });
-      setOrders(updatedOrders);
+      
     })
     .catch(error => {
-      console.error('Fetch error:', error);
-      console.log(modifiedData)
-    }); 
-  };
-  
-  const handlePutMerchants = () => {
-    // Összegyűjtjük az összes módosított kereskedő adatot
-    const modifiedMerchants = orders
-      .filter(order => order.modified)
-      .flatMap(order => order.merchants)
-      .filter(merchant => merchant.modified);
-  
-    const modifiedData = modifiedMerchants.map(merchant => ({
-      userId: merchant.id, 
-      type: merchant.type,
-      serialName: merchant.serialName,
-      quantity: merchant.quantity,
-      price: merchant.price,
-    }));
-  
-    fetch(`https://localhost:7276/api/Merchant`, {
-      method: 'PUT',
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(modifiedData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(data);
-      // Frissítsük az orders állapotot csak a módosított adatokkal
-      const updatedOrders = orders.map(order => {
-        const modifiedMerchants = order.merchants.map(merchant => {
-          const updatedMerchant = data.find(updatedMerchant => updatedMerchant.id === merchant.id);
-          if (updatedMerchant) {
-            return updatedMerchant;
-          }
-          return merchant;
-        });
-        return { ...order, merchants: modifiedMerchants };
-      });
-      setOrders(updatedOrders);
-    })
-    .catch(error => {
-      console.error('Fetch error:', error);
-      console.log(modifiedData);
+      console.error('Fetch hiba:', error);
+      console.log(updatedBillingData.orderStatus)
     });
   };
+  
+  
 
-  const handleBillingNameChange = (value, index) => {
+  const handleOrderStatusChange = (e, order, index) => {
     const updatedOrders = [...orders];
-    updatedOrders[index].purchaseBillingName = value;
-    updatedOrders[index].modified = true;
+    updatedOrders[index].orderStatus = e.target.value;
     setOrders(updatedOrders);
+    setModifiedOrders({
+      ...modifiedOrders,
+      [updatedOrders[index].purchaseId]: {
+        ...modifiedOrders[updatedOrders[index].purchaseId],
+        purchase: {
+          ...modifiedOrders[updatedOrders[index].purchaseId]?.purchase,
+          orderStatus: e.target.value
+        }
+      }
+    });
+    setUpdatedBillingData(prevData => ({
+      ...prevData,
+      orderStatus: e.target.value,
+      userId: order.id // itt használjuk az order objektumot és annak az id tulajdonságát
+    }));
   };
   
-  const handleBillingAddressChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchaseBillingAddress = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
   
-  const handleBillingPostalCodeChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchaseBillingPostalCode = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handleDeliveryAddressChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchasaeDeliveryAddress = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handlePostalCodeChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchasePostalCode = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handlePurchaseEmailChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchaseEmail = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handlePurchasePhoneNumberChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].purchasePhoneNumber = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
+  useEffect(() => {
+    const checkPurchaseDateMatch = () => {
+      
+      orders.forEach(order => {
+        order.purchases.forEach((purchase, index) => {
+          const currentPurchaseDate = purchase.purchaseDate;
+          const matchedPurchase = order.purchases.find((p, i) => i !== index && p.purchaseDate === currentPurchaseDate);
+          if (matchedPurchase) {
+            console.log('Match found in order:', order);
+            
+            const hasMatch = true;
+          }
+        });
+      });
+    };
 
-  const handleOrderStatusChange = (value, index) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].orderStatus = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
+    checkPurchaseDateMatch();
+
+  }, [orders]);
   
-  const handleMerchantTypeChange = (value, index, merchantIndex) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].merchants[merchantIndex].type = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handleMerchantSerialNameChange = (value, index, merchantIndex) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].merchants[merchantIndex].serialName = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handleMerchantQuantityChange = (value, index, merchantIndex) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].merchants[merchantIndex].quantity = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
-  const handleMerchantPriceChange = (value, index, merchantIndex) => {
-    const updatedOrders = [...orders];
-    updatedOrders[index].merchants[merchantIndex].price = value;
-    updatedOrders[index].modified = true;
-    setOrders(updatedOrders);
-  };
-  
+
   return(
   <div>
     <div>
@@ -699,366 +604,341 @@ function Admin()
           </ResponsiveRow>   
 
         
-        {activeTab === 'orders' && (
-        <div>
-        <Form>
-          <ResponsiveRow>
-            <Form.Group  style={{width: '15%'}} controlId="formName">
-              <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
-              <Form.Control type="text" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} placeholder="Név alapján szűrés" />
-            </Form.Group>
+          {activeTab === 'orders' && (
+  <div>
+    <Form>
+      <ResponsiveRow>
+        <div style={{marginTop: '15px'}} className="col-md-12 d-flex">
+        <Form.Group className="col-md-4" controlId="formName">
+          <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
+          <Form.Control type="text" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} placeholder="Név alapján szűrés" />
+        </Form.Group>
 
-            <Form.Group style={{width: '15%'}} controlId="formEmail">
-              <Form.Label style={{textDecoration: 'underline'}}>Email:</Form.Label>
-              <Form.Control type="email" value={emailFilter}  onChange={(e) => setEmailFilter(e.target.value)} placeholder="Email alapján szűrés" />
-            </Form.Group>     
-
-            <Form.Group style={{width: '15%'}} controlId="formDate">
-              <Form.Label style={{textDecoration: 'underline'}}>Dátum:</Form.Label>
-              <Form.Control type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} placeholder="Dátum alapján szűrés" />
-            </Form.Group>
-            
-            <button 
+        <Form.Group style={{ marginLeft: '20px'}} className="col-md-4" controlId="formEmail">
+          <Form.Label style={{textDecoration: 'underline'}}>Email:</Form.Label>
+          <Form.Control type="email" value={emailFilter}  onChange={(e) => setEmailFilter(e.target.value)} placeholder="Email alapján szűrés" />
+        </Form.Group>     
+        
+          <button 
+          style={{height: '37px', marginTop: '32px', marginLeft: '15%',}}
             type='button'
-            className='filter-button'
-            onClick={getAllOrders}
-            style={{
-              width: '15%',
-              height: '1%', 
-              marginTop: '2.3%', 
-              borderRadius: '15%', 
-              backgroundColor: 'greenyellow' }}>
-              Lekérdezés
-            </button>
-
-            <button 
+            className='btn btn-success filter-button'
+            onClick={getAllOrders}>
+            Lekérdezés
+          </button>
+          <button 
+           style={{height: '37px', marginTop: '32px'}}
             type='button'
-            className='filter-button'
-            onClick={handlePutOrders}
-            style={{
-              width: '15%',
-              height: '1%', 
-              marginTop: '2.3%', 
-              borderRadius: '15%', 
-              backgroundColor: 'greenyellow' }}>
-              Módosítás
-            </button>
-          </ResponsiveRow>
-          <div>
-          <Table style={{marginTop: '1%'}} striped bordered hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Teljes név</th>
-                <th>Számlázási név</th>
-                <th>Számlázási cím</th>
-                <th>Számlázási irányítószám</th> 
-                <th>Szállítási cím</th>
-                <th>Szállítási cím irányítószám</th>
-                <th>Email</th>
-                <th>Telefonszám</th>
-                <th>Rendelés dátuma</th>
-                <th>Rendelés státusza</th>
-                <th>Termék típusa</th>
-                <th>Termék Széria neve</th>
-                <th>Rendelt mennyiség</th>
-                <th>Termék ára</th>
-              </tr>
-            </thead>
-            <tbody>
-            {orders && orders
-                .filter(order => 
-                  (nameFilter === '' || (order.fullName && order.fullName.includes(nameFilter))) &&
-                  (emailFilter === '' || (order.purchaseEmail && order.purchaseEmail.includes(emailFilter))) &&
-                  (dateFilter === '' || (order.purchaseDate && order.purchaseDate.includes(dateFilter)))
-                )
+            className='btn btn-success filter-button'
+            onClick={handlePutOrderStatus}>
+            Státusz módosítása
+          </button>
+        </div>   
+        
+      </ResponsiveRow>
+      
+      <div className="table-responsive">
+        <Table style={{ marginTop: '1%' }} striped bordered hover>
+          <thead>
+            <tr>
+              <th>#SZID</th>
+              <th>Teljes név</th>
+              <th>Számlázási név</th>
+              <th>Számlázási cím</th>
+              <th>Számlázási irányítószám</th>
+              <th>Szállítási cím</th>
+              <th>Szállítási cím irányítószám</th>
+              <th>Email</th>
+              <th>Telefonszám</th>
+              <th>Rendelés dátuma</th>
+              <th>Rendelés státusza</th>
+              <th>#TID</th>
+              <th>Termék típusa</th>
+              <th>Termék Széria neve</th>
+              <th>Rendelt mennyiség</th>
+              <th>Termék ára</th>
+            </tr>
+          </thead>
+          <tbody>
+          
+            {orders &&
+              orders 
+              
+              .filter(order => 
+                (nameFilter === '' || (order.fullName && order.fullName.toLowerCase().includes(nameFilter.toLowerCase()))) &&
+                (emailFilter === '' || (order.purchases.some(purchase => purchase.purchaseEmail && purchase.purchaseEmail.toLowerCase().includes(emailFilter.toLowerCase())))) 
+               
+              )
+                .sort((a, b) => a.purchaseId - b.purchaseId)
                 .map((order, index) => (
                   <React.Fragment key={index}>
-                    {/* Elválasztó vonal minden új felhasználóhoz */}
-                    {index !== 0 && orders[index - 1].purchaseEmail !== order.purchaseEmail && (
-                      <tr key={`separator-${index}`}>
-                        <td colSpan="15" style={{ borderBottom: "2px solid black" }}></td>
-                      </tr>
-                    )}
-
-                    {/* Azonos felhasználóhoz tartozó rendelések */}
-                    {order.merchants.map((merchant, merchantIndex) => (
-                      <tr key={`${index}-${merchantIndex}`}>
-                        <td>{index + 1}</td>
-                        <td> {order.fullName}</td>
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchaseBillingName}
-                              onChange={(e) => handleBillingNameChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchaseBillingName
-                          )}
-                        </td>
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchaseBillingAddress}
-                              onChange={(e) => handleBillingAddressChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchaseBillingAddress
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchaseBillingPostalCode}
-                              onChange={(e) => handleBillingPostalCodeChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchaseBillingPostalCode
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchasaeDeliveryAddress}
-                              onChange={(e) => handleDeliveryAddressChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchasaeDeliveryAddress
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchasePostalCode}
-                              onChange={(e) => handlePostalCodeChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchasePostalCode
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchaseEmail}
-                              onChange={(e) => handlePurchaseEmailChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchaseEmail
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.purchasePhoneNumber}
-                              onChange={(e) => handlePurchasePhoneNumberChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.purchasePhoneNumber
-                          )}
-                        </td>
-
-                        <td>{order.purchaseDate}</td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={order.orderStatus}
-                              onChange={(e) => handleOrderStatusChange(e.target.value, index)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            order.orderStatus
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={merchant.type}
-                              onChange={(e) => handleMerchantTypeChange(e.target.value, index, merchant)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            merchant.type
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={merchant.serialName}
-                              onChange={(e) => handleMerchantSerialNameChange(e.target.value, index, merchant)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            merchant.serialName
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={merchant.quantity}
-                              onChange={(e) => handleMerchantQuantityChange(e.target.value, index, merchant)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            merchant.quantity
-                          )}
-                        </td>
-
-                        <td onClick={() => setEditingIndex(index)}>
-                          {editingIndex === index ? (
-                            <input
-                              type="text"
-                              value={merchant.price}
-                              onChange={(e) => handleMerchantPriceChange(e.target.value, index, merchant)}
-                              style={{width: '100%'}}
-                            />
-                          ) : (
-                            merchant.price
-                          )}
-                        </td>
-                      </tr>
+                    {order.purchases.map((purchase, purchaseIndex) => (
+                      <React.Fragment key={`${index}-purchase-${purchaseIndex}`}>
+                        <tr key={`${index}-column`}>
+                          <td>{purchase.purchaseId}</td>
+                          <td>{order.fullName}</td>
+                          <td>
+                            {editingIndex === index ? (
+                              <input           
+                                type="text"
+                                value={purchase.purchaseBillingName}
+                                disabled={true}
+                                style={{ width: '100%' }}
+                                
+                              />
+                                
+                            ) : (
+                              purchase.purchaseBillingName
+                              
+                            )}
+                          </td>
+                          <td>
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={purchase.purchaseBillingAddress}
+                                disabled={true}
+                              />
+                            ) : (
+                              purchase.purchaseBillingAddress
+                            )}
+                          </td>
+                          <td
+                           
+                          >
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={purchase.purchaseBillingPostalCode}
+                                disabled={true}
+                                style={{ width: '100%' }}
+                              />
+                            ) : (
+                              purchase.purchaseBillingPostalCode
+                            )}
+                          </td>
+                          <td
+                            
+                          >
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={
+                                  purchase.purchasaeDeliveryAddress
+                                }
+                                disabled={true}
+                                style={{ width: '100%' }}
+                              />
+                            ) : (
+                              purchase.purchaseDeliveryAddress
+                            )}
+                          </td>
+                          <td
+                            
+                          >
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={purchase.purchasePostalCode}
+                                disabled={true}
+                                style={{ width: '100%' }}
+                              />
+                            ) : (
+                              purchase.purchasePostalCode
+                            )}
+                          </td>
+                          <td
+                           
+                          >
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={purchase.purchaseEmail}
+                                disabled={true}
+                                style={{ width: '100%' }}
+                              />
+                            ) : (
+                              purchase.purchaseEmail
+                            )}
+                          </td>
+                          <td
+                            
+                          >
+                            {editingIndex === index ? (
+                              <input
+                                type="text"
+                                value={
+                                  purchase.purchasePhoneNumber
+                                }
+                                disabled={true}
+                                style={{ width: '100%' }}
+                              />
+                            ) : (
+                              purchase.purchasePhoneNumber
+                            )}
+                          </td>
+                          <th>{purchase.purchaseDate}</th>
+                          <td>
+                            {editingIndex === index ? (
+                              <textarea
+                                type="text"
+                                value={order.orderStatus}
+                                onChange={(e) => handleOrderStatusChange(e, order, index)}
+                                style={{ width: '100%' }}
+                                autoFocus
+                              />
+                            ) : (
+                              <span onClick={() => setEditingIndex(index)}>{order.orderStatus}</span>
+                            )}
+                          </td>
+                          
+                          <td style={{backgroundColor: 'lightblue'}}></td>
+                          <td style={{backgroundColor: 'lightblue'}}></td>
+                          <td style={{backgroundColor: 'lightblue'}}></td>
+                          <td style={{backgroundColor: 'lightblue'}}></td>
+                          <td style={{backgroundColor: 'lightblue'}}></td>
+                          
+                        </tr>
+                        {order.merchants.map((merchant, merchantIndex) => {
+                        const isAlreadyAdded = displayedMerchantIds.includes(merchant.id);
+                        if (purchase.tid !== merchant.id || isAlreadyAdded) {
+                          return null;
+                        }
+                        return (
+                            <tr key={`${index}-${purchaseIndex}-merchant-${merchantIndex}`}>
+                              <td colSpan="11"></td> {/* 10 = a vissza maradó oszlopok száma */}
+                              <td>{merchant.id}</td>
+                              <td>
+                                {editingIndex === index ? (
+                                  <input
+                                    type="text"
+                                    value={merchant.type}
+                                    style={{ width: '100%' }}
+                                  />
+                                ) : (
+                                  merchant.type
+                                )}
+                              </td>
+                              <td>
+                                {editingIndex === index ? (
+                                  <input
+                                    type="text"
+                                    value={merchant.serialName}
+                                    style={{ width: '100%' }}
+                                  />
+                                ) : (
+                                  merchant.serialName
+                                )}
+                              </td>
+                              <td>
+                                {editingIndex === index ? (
+                                  <input
+                                    type="text"
+                                    value={merchant.quantity}
+                                    style={{ width: '100%' }}
+                                  />
+                                ) : (
+                                  merchant.quantity
+                                )}
+                              </td>
+                              <td>
+                                {editingIndex === index ? (
+                                  <input
+                                    type="text"
+                                    value={merchant.price}
+                                    style={{ width: '100%' }}
+                                  />
+                                ) : (
+                                  merchant.price
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </React.Fragment>
                     ))}
+                  
                   </React.Fragment>
                 ))}
-            </tbody>
-          </Table>
-          </div>      
-        </Form> 
-        </div> 
-        )} 
-        {activeTab === 'users' && (
-        <div>
-          <Form>
-          <ResponsiveRow>
-            <Form.Group  style={{width: '15%'}} controlId="formName">
-              <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
-              <Form.Control type="text" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} placeholder="Név alapján szűrés" />
-            </Form.Group>
+          </tbody>
+        </Table>
+      </div>      
+    </Form> 
+  </div> 
+)}
+       {activeTab === 'users' && (
+  <div>
+    <Form>
+      <ResponsiveRow>
+        <Form.Group className="col-md-4" controlId="formName">
+          <Form.Label style={{textDecoration: 'underline'}}>Név:</Form.Label>
+          <Form.Control type="text" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} placeholder="Név alapján szűrés" />
+        </Form.Group>
 
-            <Form.Group style={{width: '15%'}} controlId="formEmail">
-              <Form.Label style={{textDecoration: 'underline'}}>Email:</Form.Label>
-              <Form.Control type="email" value={emailFilter}  onChange={(e) => setEmailFilter(e.target.value)} placeholder="Email alapján szűrés" />
-            </Form.Group>     
-  
-            <button 
+        <Form.Group className="col-md-4" controlId="formEmail">
+          <Form.Label style={{textDecoration: 'underline'}}>Email:</Form.Label>
+          <Form.Control type="email" value={emailFilter}  onChange={(e) => setEmailFilter(e.target.value)} placeholder="Email alapján szűrés" />
+        </Form.Group>     
+        
+        <div style={{marginTop: '32px'}} className="col-md-4">
+          <button 
             type='button'
-            className='filter-button'
-            onClick={getAllUsers}
-            style={{
-              width: '15%',
-              height: '1%', 
-              marginTop: '2.4%', 
-              borderRadius: '15%', 
-              backgroundColor: 'greenyellow' }}>
-              Lekérdezés
-            </button>
+            className='btn btn-success filter-button'
+            onClick={getAllUsers}>
+            Lekérdezés
+          </button>
 
-            <button 
-              type='button'
-              className='filter-button'
-              onClick={() => handleAddNew(true)}
-              style={{
-                width: '15%',
-                height: '1%', 
-                marginTop: '2.4%', 
-                borderRadius: '15%', 
-                backgroundColor: 'greenyellow' }}>
-              Új hozzáadása
-            </button>
+          <button 
+            type='button'
+            className='btn btn-success filter-button'
+            onClick={() => handleAddNew(true)}>
+            Új hozzáadása
+          </button>
 
-            <button 
-              type='button'
-              className='filter-button'
-              onClick={() => {
-                handleUploadClick();
-                handleAddNewUser();
-                HandlePutRole(modifiedId, modifiedRole);
-               
-              }}
-              style={{
-                width: '15%',
-                height: '1%', 
-                marginTop: '2.4%', 
-                borderRadius: '15%', 
-                backgroundColor: 'greenyellow' }}>
-              Módosítás
-            </button>
+          <button 
+            type='button'
+            className='btn btn-success filter-button'
+            onClick={() => {
+              handleUploadClick();
+              handleAddNewUser();
+              HandlePutRole(modifiedId, modifiedRole);}}>
+            Módosítás
+          </button>
 
-            <button 
-              type='button'
-              className='filter-button'
-              onClick={handleDeleteSelectedUsers}
-              style={{
-                width: '15%',
-                height: '1%', 
-                marginTop: '2.4%', 
-                borderRadius: '15%', 
-                backgroundColor: 'red' }}>
-              Kiválasztottak törlése
-            </button>
-            
-          </ResponsiveRow>
-          <div> 
-          <Table  style={{marginTop: '1%'}} striped bordered hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>GUID</th>
-                <th>Teljes név</th>
-                <th>Felhasználónév</th>
-                <th>Email</th>
-                <th>Kor</th>
-                <th>Jelszó</th>
-                <th>Telefonszám</th>
-                <th>Jogosultság</th>
-              </tr>
-            </thead>
-            <tbody>
+          <button 
+            type='button'
+            className='btn btn-danger filter-button'
+            onClick={handleDeleteSelectedUsers}>
+            Kiválasztottak törlése
+          </button>
+        </div>
+      </ResponsiveRow>
+      
+      <div style={{marginTop: '15px'}} className="table-responsive">
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>GUID</th>
+              <th>Teljes név</th>
+              <th>Felhasználónév</th>
+              <th>Email</th>
+              <th>Kor</th>
+              <th>Jelszó</th>
+              <th>Telefonszám</th>
+              <th>Jogosultság</th>
+            </tr>
+          </thead>
+          <tbody>
             {users && users
               .filter(user => 
-                (nameFilter === '' || (user.fullName && user.fullName.includes(nameFilter))) &&
-                (emailFilter === '' || (user.purchaseEmail && user.purchaseEmail.includes(emailFilter))) &&
-                (dateFilter === '' || (user.purchaseDate && user.purchaseDate.includes(dateFilter)))
+                (nameFilter === '' || (user.fullName && user.fullName.toLowerCase().includes(nameFilter.toLowerCase()))) &&
+                (emailFilter === '' || (user.email && user.email.toLowerCase().includes(emailFilter.toLowerCase()))) 
               )
               .map((user, index) => (
                 <tr key={index}>
-                  <td>{index + 1}
-                  <input
-                    style={{float: 'right'}}
-                    type="checkbox"
-                    onChange={() => handleCheckboxChange(user.id)} // Ide írd a kiválasztás kezelőjét
-                    checked={isSelected(user.id)} // Ide írd a kiválasztás állapotának ellenőrzését
-                  />
-                  </td>
-                  <td onClick={() => setEditingIndex(index)}>
-                    {user.id}
-                  </td>
+                  <td>{index + 1}</td>
+                  <td onClick={() => setEditingIndex(index)}>{user.id}</td>
                   <td onClick={() => setEditingIndex(index)}>
                     {editingIndex === index ? (
                       <input
@@ -1141,90 +1021,82 @@ function Admin()
                     )}
                   </td>                           
                 </tr>           
-            ))} 
+              ))} 
+          </tbody>
+        </Table>
+      </div>
+
+      {showNewTable && (
+        <div className="table-responsive">
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Teljes név</th>
+                <th>Felhasználónév</th>
+                <th>Email</th>
+                <th>Kor</th>
+                <th>Jelszó</th>
+                <th>Telefonszám</th>
+                <th>Jogosultság</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange(e, 'fullName')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange(e, 'userName')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange(e, 'email')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange(e, 'age')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange (e, 'passwordHash')}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    onChange={(e) => handleNewRecordChange(e, 'phoneNumber')}
+                  />
+                </td>
+                <td>
+                  <select
+                    value={newRecord.newRole}
+                    onChange={(e) => handleNewRecordChange(e, 'newRole')}
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                  </select>
+                </td>
+              </tr>
             </tbody>
-              </Table>
-              {showNewTable && (
-              <div className="table-container">
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Teljes név</th>
-                      <th>Felhasználónév</th>
-                      <th>Email</th>
-                      <th>Kor</th>
-                      <th>Jelszó</th>
-                      <th>Telefonszám</th>
-                      <th>Jogosultság
-                      <button onClick={() => setShowNewTable(false)} 
-                        style={{
-                          color: 'red',
-                          float: 'right',
-                          background: 'none',
-                          border: 'none' }}>
-                        <FaTimes />
-                      </button>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange (e, 'fullName')}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange(e, 'userName')}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange(e, 'email')}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange(e, 'age')}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange (e, 'passwordHash')}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          onChange={(e) => handleNewRecordChange(e, 'phoneNumber')}
-                        />
-                      </td>
-                      <td>
-                      <select
-                        value={newRecord.newRole}
-                        onChange={(e) => handleNewRecordChange(e, 'newRole')}
-                      >
-                        <option value="admin">Admin</option>
-                        <option value="user">User</option>
-                      </select>
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </div>
-            )}
-          </div>      
-        </Form> 
+          </Table>
         </div>
-      )}      
+      )}
+    </Form>
+  </div>
+)}
       </div>
       </ResponsiveRow>
     </ResponsiveContainer>
