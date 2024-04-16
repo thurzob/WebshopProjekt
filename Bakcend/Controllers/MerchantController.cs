@@ -14,18 +14,14 @@ namespace Bakcend.Controllers
         [HttpPost]
         public ActionResult Post(CreateMerchantDto createMerchantDto)
         {
-
             var merchant = new Merchant()
             {
                 UserId = createMerchantDto.UserId,
                 SerialName = createMerchantDto.SerialName,
                 Type = createMerchantDto.Type,
-                Price = createMerchantDto.Price,                  
+                Price = createMerchantDto.Price,
                 ProductId = createMerchantDto.ProductId,
                 Quantity = createMerchantDto.Quantity,
-                
-                
-               
             };
 
             using (var context = new WebshopContext())
@@ -38,9 +34,14 @@ namespace Bakcend.Controllers
                 {
                     context.Add(merchant);
                     context.SaveChanges();
-                    return Ok(merchant);
-                }
 
+                    
+
+                    
+
+                    
+                    return Ok(merchant.Id);
+                }
             }
         }
 
@@ -110,7 +111,9 @@ namespace Bakcend.Controllers
 
                     existingmerchant.SerialName = existingmerchant.SerialName;
                     existingmerchant.Type = existingmerchant.Type;
+                    existingmerchant.Quantity = existingmerchant.Quantity;
                     existingmerchant.Price = existingmerchant.Price;
+                    
 
                     context.Merchants.Update(existingmerchant);
                     context.SaveChanges();

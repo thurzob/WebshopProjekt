@@ -23,7 +23,11 @@ public partial class Purchase
 
     public string UserId { get; set; } = null!;
 
+    public int Tidid { get; set; }
+
     public DateTime Date { get; set; }
 
-    public virtual Aspnetuser? User { get; set; }
+    public virtual Merchant Tid { get; set; } = null!;
+
+    public virtual Aspnetuser User { get; set; } = null!;
 }

@@ -12,14 +12,13 @@
         public string OrderStatus { get; set; }
 
         public List<MerchantDto> Merchants { get; set; }
+        public List<PurchaseDto> Purchases { get; set; }
 
 
-
-
-       
-
-
-        
+    }
+    public class PurchaseDto
+    {
+        public int PurchaseId { get; set; }
         public string PurchaseBillingName { get; set; }
         public string PurchaseBillingPostalCode { get; set; }
         public string PurchaseBillingAddress { get; set; }
@@ -27,19 +26,19 @@
         public string PurchasePostalCode { get; set; }
         public string PurchasaeDeliveryAddress { get; set; }
         public string PurchasePhoneNumber { get; set; }
-
+        public int TID { get; set; }
         public DateTime PurchaseDate { get; set; }
-        
     }
 
     public class MerchantDto
     {
+        public int Id { get; set; }
         public string Type { get; set; }
         public string SerialName { get; set; }
         public int Price { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
-        // Itt töltsd ki a többi merchant adatot
+        
     }
 
 }

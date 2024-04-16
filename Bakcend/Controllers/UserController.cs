@@ -57,42 +57,42 @@ namespace Bakcend.Controllers
         }
 
         [HttpPost("{id}/CreateOrderStatus")]
-public ActionResult CreateOrderStatus(string id, [FromBody] CreateOrderStatusDto createOrderStatusDto)
-{
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(ModelState);
-    }
-
-    using (var context = new WebshopContext())
-    {
-        var existingUser = context.Aspnetusers.FirstOrDefault(aspnetuser => aspnetuser.Id == id);
-
-        if (existingUser != null)
-        {
-            // Létrehozzuk az új OrderStatus rekordot és hozzáadjuk a felhasználóhoz
-            existingUser.OrderStatus = createOrderStatusDto.OrderStatus;
-
-            try
+            public ActionResult CreateOrderStatus(string id, [FromBody] CreateOrderStatusDto createOrderStatusDto)
             {
-                context.SaveChanges();
-                return Ok(new
+                if (!ModelState.IsValid)
                 {
-                    Message = "Sikeresen létrehozva az OrderStatus!",
-                    CreatedOrderStatus = existingUser.OrderStatus
-                });
+                    return BadRequest(ModelState);
+                }
+
+                using (var context = new WebshopContext())
+                {
+                    var existingUser = context.Aspnetusers.FirstOrDefault(aspnetuser => aspnetuser.Id == id);
+
+                    if (existingUser != null)
+                    {
+                        // Létrehozzuk az új OrderStatus rekordot és hozzáadjuk a felhasználóhoz
+                        existingUser.OrderStatus = createOrderStatusDto.OrderStatus;
+
+                        try
+                        {
+                            context.SaveChanges();
+                            return Ok(new
+                            {
+                                Message = "Sikeresen létrehozva az OrderStatus!",
+                                CreatedOrderStatus = existingUser.OrderStatus
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            return StatusCode(500, new { Message = "Hiba történt a létrehozás közben." });
+                        }
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
             }
-            catch (Exception)
-            {
-                return StatusCode(500, new { Message = "Hiba történt a létrehozás közben." });
-            }
-        }
-        else
-        {
-            return NotFound();
-        }
-    }
-}
 
 
 
@@ -132,7 +132,7 @@ public ActionResult CreateOrderStatus(string id, [FromBody] CreateOrderStatusDto
             {
                 var usersWithMerchantsAndPurchases = context.Aspnetusers
                     .Include(u => u.Merchants)
-                    .Include(u => u.Purchases) // Hozzáadva a vásárlások lekérdezéséhez
+                    .Include(u => u.Purchases) 
                     .ToList();
 
                 if (usersWithMerchantsAndPurchases != null && usersWithMerchantsAndPurchases.Any())
@@ -154,25 +154,31 @@ public ActionResult CreateOrderStatus(string id, [FromBody] CreateOrderStatusDto
 
                             Merchants = userWithMerchantAndPurchase.Merchants.Select(m => new MerchantDto
                             {
+                                Id = m.Id,
                                 Type = m.Type,
                                 SerialName = m.SerialName,
                                 Price = (int)m.Price,
                                 Quantity = (int)m.Quantity,
                                 ProductId = (int)m.ProductId,
-                                // Itt töltsd ki a többi merchant adatot
+                                
                             }).ToList(),
-                            // Itt töltsd ki a többi merchant adatot
-                            // ...
+                            
 
-                            // Purchase adatok
-                            PurchaseBillingName = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.BillingName,
-                            PurchaseBillingAddress = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.BillingAddress,
-                            PurchaseEmail = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.Email,
-                            PurchasePostalCode = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.PostalCode,
-                            PurchaseBillingPostalCode = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.BillingPostalCode,
-                            PurchasaeDeliveryAddress = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.DeliveryAddress,
-                            PurchasePhoneNumber = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.PhoneNumber,
-                            PurchaseDate = userWithMerchantAndPurchase.Purchases?.FirstOrDefault()?.Date ?? DateTime.MinValue,
+                            Purchases = userWithMerchantAndPurchase.Purchases.Select(p => new PurchaseDto
+                            {
+                                PurchaseId = p.Id,
+                                PurchaseBillingName = p.BillingName,
+                                PurchaseBillingAddress = p.BillingAddress,
+                                PurchaseEmail = p.Email,
+                                PurchasePostalCode = p.PostalCode,
+                                PurchaseBillingPostalCode = p.BillingPostalCode,
+                                PurchasaeDeliveryAddress = p.DeliveryAddress,
+                                PurchasePhoneNumber = p.PhoneNumber,
+                                PurchaseDate = p.Date,
+                                TID = p.Tidid
+                                
+                                
+                            }).ToList()
 
 
                             // Itt töltsd ki a többi purchase adatot

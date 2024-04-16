@@ -13,6 +13,8 @@ using Bakcend.Data;
 using Bakcend.Models;
 using Microsoft.AspNetCore.Identity;
 using Bakcend.Service;
+using System.Net.Mail;
+using System.Net;
 
 namespace Auth.Controllers
 {
@@ -26,8 +28,8 @@ namespace Auth.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService authService;
-        private readonly string outlookEmailAddress = "bence.thurzo@outlook.hu"; // Gmail címed
-        private readonly string outlookEmailPassword = "Fundango980123"; // Gmail jelszavad
+        private readonly string gmailEmailAddress = "thurzobence98@gmail.com"; // Gmail címed
+        private readonly string gmailEmailPassword = "uopd apeq etaa hihc"; // Gmail jelszavad
         
         public AuthController(IAuthService authService)
         {
@@ -148,18 +150,18 @@ namespace Auth.Controllers
                 var newPassword = authService.GenerateRandomPassword();
 
                 // Email küldése a visszaállított jelszóval
-                using (var client = new SmtpClient("smtp.office365.com", 587))
+                using (var client = new SmtpClient("smtp.gmail.com", 587))
                 {
                     client.EnableSsl = true;
-                    client.Credentials = new NetworkCredential(outlookEmailAddress, outlookEmailPassword);
+                    client.Credentials = new NetworkCredential(gmailEmailAddress, gmailEmailPassword);
 
                     var mailMessage = new MailMessage();
-                    mailMessage.From = new MailAddress(outlookEmailAddress);
+                    mailMessage.From = new MailAddress(gmailEmailAddress);
                     mailMessage.To.Add(passwordResetRequestDto.Email);
                     mailMessage.Subject = "Jelszó visszaállítás";
                     mailMessage.Body = "Az új jelszavad: " + newPassword;
 
-                    client.Send(mailMessage);
+                    client.Send(mailMessage); 
                 }
 
                 return StatusCode(200, "Az új jelszó sikeresen frissítve az adatbázisban és elküldve az email címre.");

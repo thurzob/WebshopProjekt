@@ -219,6 +219,8 @@ public partial class WebshopContext : DbContext
 
             entity.ToTable("purchase");
 
+            entity.HasIndex(e => e.Tidid, "TIDID");
+
             entity.HasIndex(e => e.UserId, "UserId");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
@@ -232,6 +234,17 @@ public partial class WebshopContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(255);
             entity.Property(e => e.PostalCode).HasMaxLength(255);
+            entity.Property(e => e.Tidid)
+                .HasColumnType("int(11)")
+                .HasColumnName("TIDID");
+
+            entity.HasOne(d => d.Tid).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.Tidid)
+                .HasConstraintName("purchase_ibfk_1");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Purchases)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("purchase_ibfk_2");
         });
 
         modelBuilder.Entity<Storage>(entity =>

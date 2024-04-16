@@ -35,9 +35,10 @@ namespace Bakcend.Controllers
                 PostalCode = createPurchaseDto.PostalCode,
                 DeliveryAddress = createPurchaseDto.DeliveryAddress,
                 PhoneNumber = createPurchaseDto.PhoneNumber,
+                Tidid = createPurchaseDto.Tidid,
                 UserId = createPurchaseDto.UserId,
                 Date = createPurchaseDto.Date,
-                // További adatok beállítása...
+                
             };
 
             // Regisztráció manuális hozzáadása
@@ -57,8 +58,8 @@ namespace Bakcend.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public ActionResult Put(int id, UpdatePurchaseDto updatePurchaseDto)
+        [HttpPut("{Id}")]
+        public ActionResult Put(int Id, UpdatePurchaseDto updatePurchaseDto)
         {
             if (!ModelState.IsValid)
             {
@@ -67,14 +68,14 @@ namespace Bakcend.Controllers
 
             using (var context = new WebshopContext())
             {
-                var purchase = context.Purchases.FirstOrDefault(p => p.Id == id);
+                var purchase = context.Purchases.FirstOrDefault(p => p.Id == updatePurchaseDto.Id);
 
                 if (purchase == null)
                 {
                     return NotFound();
                 }
 
-                // Frissítjük a vásárlás adatait az új adatokkal
+                purchase.Id = updatePurchaseDto.Id; 
                 purchase.BillingName = updatePurchaseDto.BillingName;
                 purchase.BillingPostalCode = updatePurchaseDto.BillingPostalCode;
                 purchase.BillingAddress = updatePurchaseDto.BillingAddress;
@@ -82,12 +83,27 @@ namespace Bakcend.Controllers
                 purchase.PostalCode = updatePurchaseDto.PostalCode;
                 purchase.DeliveryAddress = updatePurchaseDto.DeliveryAddress;
                 purchase.PhoneNumber = updatePurchaseDto.PhoneNumber;
-                purchase.UserId = updatePurchaseDto.UserId;
                 
+
                 // További adatok frissítése...
 
                 context.SaveChanges();
-                return Ok(purchase);
+
+                // Visszaadjuk csak a módosított adatokat
+                var updatedPurchaseDto = new UpdatedPurchaseDto
+                {
+                    Id = purchase.Id,
+                    BillingName = purchase.BillingName,
+                    BillingPostalCode = purchase.BillingPostalCode,
+                    BillingAddress = purchase.BillingAddress,
+                    Email = purchase.Email,
+                    PostalCode = purchase.PostalCode,
+                    DeliveryAddress = purchase.DeliveryAddress,
+                    PhoneNumber = purchase.PhoneNumber,
+                    
+                };
+
+                return Ok(updatedPurchaseDto);
             }
         }
 

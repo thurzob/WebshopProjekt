@@ -19,5 +19,7 @@ public partial class Merchant
 
     public string? UserId { get; set; }
 
+    public virtual ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
+
     public virtual Aspnetuser? User { get; set; }
 }
