@@ -11,7 +11,7 @@ namespace Bakcend.Service.IAuth
         Task<IEnumerable<UserRoleDto>> GetRolesForAllUsers();
         Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto);
 
-        Task<bool> ResetPassword(string email);
+        Task<bool> ResetPassword(string email, string newPassword);
         string GenerateRandomPassword();
     }
 }

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Bakcend.Service;
 using System.Net.Mail;
 using System.Net;
+using System.Text;
 
 namespace Auth.Controllers
 {
@@ -35,10 +36,9 @@ namespace Auth.Controllers
         {
             this.authService = authService;
         }
-        
+
 
         // Replace MyContext with your actual DbContext class name
-
 
 
 
@@ -51,7 +51,50 @@ namespace Auth.Controllers
             {
                 return StatusCode(400, errorMessage);
             }
+
+            // Sikeres regisztráció esetén küldjünk egy megerősítő e-mailt
+            try
+            {
+                var emailSent = await SendRegistrationConfirmationEmail(registerRequestDto.Email);
+                if (!emailSent)
+                {
+                    // Ha nem sikerült elküldeni az e-mailt, akkor adjunk vissza egy hibaüzenetet
+                    return StatusCode(500, "Nem sikerült elküldeni a megerősítő e-mailt.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ha valamilyen hiba történt az e-mail küldése közben, akkor adjunk vissza egy hibaüzenetet
+                return StatusCode(500, $"Hiba történt az e-mail küldése közben: {ex.Message}");
+            }
+
             return StatusCode(201, "Sikeres regisztráció");
+        }
+
+        private async Task<bool> SendRegistrationConfirmationEmail(string emailAddress)
+        {
+            try
+            {
+                using (var client = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    client.EnableSsl = true;
+                    client.Credentials = new NetworkCredential(gmailEmailAddress, gmailEmailPassword);
+
+                    var mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress(gmailEmailAddress);
+                    mailMessage.To.Add(emailAddress);
+                    mailMessage.Subject = "Sikeres regisztráció";
+                    mailMessage.Body = "Kedves Felhasználó! Köszönjük a regisztrációt.";
+
+                    await client.SendMailAsync(mailMessage);
+                }
+
+                return true; // Az e-mail küldése sikeres volt
+            }
+            catch
+            {
+                return false; // Az e-mail küldése sikertelen volt
+            }
         }
 
 
@@ -127,29 +170,42 @@ namespace Auth.Controllers
             return StatusCode(200, loginResponseWithUserId);
         }
 
+        private string HashPassword(string password)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                // Convert the byte array to hexadecimal string
+                var builder = new StringBuilder();
+                for (int i = 0; i < hashedBytes.Length; i++)
+                {
+                    builder.Append(hashedBytes[i].ToString("x2"));
+                }
+
+                return builder.ToString();
+            }
+        }
+
         [HttpPost("reset-password")]
         public async Task<ActionResult> ResetPasswordManually(PasswordResetRequestDto passwordResetRequestDto)
         {
             try
             {
-                // Ellenőrizd, hogy az email cím nem üres
-                if (string.IsNullOrEmpty(passwordResetRequestDto.Email))
-                {
-                    return StatusCode(400, "Az email cím nem lehet üres.");
-                }
+                // Új jelszó generálása
+                var newPassword = authService.GenerateRandomPassword();
 
-                // Jelszó frissítése az adatbázisban
-                var passwordUpdated = await authService.ResetPassword(passwordResetRequestDto.Email);
+                // Jelszó frissítése az adatbázisban az új jelszóval
+                var hashedNewPassword = HashPassword(newPassword);
 
+                // Jelszó frissítése az adatbázisban az új jelszóval
+                var passwordUpdated = await authService.ResetPassword(passwordResetRequestDto.Email, hashedNewPassword);
                 if (!passwordUpdated)
                 {
                     return StatusCode(500, "Nem sikerült frissíteni az új jelszót az adatbázisban.");
                 }
 
-                // Jelszó generálása
-                var newPassword = authService.GenerateRandomPassword();
-
-                // Email küldése a visszaállított jelszóval
+                // Email küldése az új jelszóval
                 using (var client = new SmtpClient("smtp.gmail.com", 587))
                 {
                     client.EnableSsl = true;
@@ -161,16 +217,19 @@ namespace Auth.Controllers
                     mailMessage.Subject = "Jelszó visszaállítás";
                     mailMessage.Body = "Az új jelszavad: " + newPassword;
 
-                    client.Send(mailMessage); 
+                    client.Send(mailMessage);
                 }
 
-                return StatusCode(200, "Az új jelszó sikeresen frissítve az adatbázisban és elküldve az email címre.");
+                return Ok(new { Message = "A jelszó sikeresen frissült és az új jelszó elküldve az email címre.", NewPassword = newPassword });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Hiba történt az új jelszó mentése és az email küldése közben: {ex.Message}");
             }
+
         }
+
+        
     }
 
 }

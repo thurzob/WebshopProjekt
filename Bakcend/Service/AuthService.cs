@@ -134,6 +134,7 @@ namespace Bakcend.Service
                 FullName = registerRequestDto.Fullname,
                 PhoneNumber = registerRequestDto.PhoneNumber,
                 Age = registerRequestDto.Age,
+                
             };
 
             try
@@ -171,15 +172,12 @@ namespace Bakcend.Service
 
         }
 
-        public async Task<bool> ResetPassword(string email)
+        public async Task<bool> ResetPassword(string email, string newPassword)
         {
             var user = await appDbContext.applicationUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user != null)
             {
-                // Új jelszó generálása
-                var newPassword = GenerateRandomPassword();
-
                 // Felhasználó jelszavának frissítése az új jelszóra
                 user.PasswordHash = newPassword;
 
@@ -198,11 +196,33 @@ namespace Bakcend.Service
         // Jelszó generálása
         public string GenerateRandomPassword()
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const string charsUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string charsLower = "abcdefghijklmnopqrstuvwxyz";
+            const string charsDigits = "0123456789";
+            const string charsSpecial = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+            string[] charCategories = { charsUpper, charsLower, charsDigits, charsSpecial };
+
             Random random = new Random();
-            return new string(Enumerable.Repeat(chars, 6) // 6 karakter hosszú jelszó
-                .Select(s => s[random.Next(s.Length)])
-                .ToArray());
+
+            // Legalább egy karakter minden kategóriából
+            string password = new string(
+                Enumerable.Range(0, 4) // Négy karakter kategória
+                    .SelectMany(i => Enumerable.Repeat(charCategories[i], 1)) // Minden kategóriából egy karakter
+                    .Concat(Enumerable.Repeat(charsUpper + charsLower + charsDigits + charsSpecial, 4 - 1)) // További karakterek véletlenszerűen választva
+                    .Select(s => s[random.Next(s.Length)])
+                    .OrderBy(c => random.Next()) // Vegyes sorrend
+                    .ToArray()
+            );
+
+            // További véletlenszerű karakterek hozzáadása a minimum hosszúsághoz
+            while (password.Length < 12)
+            {
+                char randomChar = charCategories[random.Next(4)][random.Next(0, charCategories[random.Next(4)].Length)];
+                password += randomChar;
+            }
+
+            return password;
         }
     }
 }
