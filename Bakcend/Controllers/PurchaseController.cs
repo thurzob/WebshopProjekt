@@ -10,6 +10,8 @@ using Bakcend.Service.IAuth;
 using Bakcend.Service;
 using Bakcend.Data;
 using System;
+using System.Net.Mail;
+using System.Net;
 
 
 namespace Bakcend.Controllers
@@ -18,8 +20,10 @@ namespace Bakcend.Controllers
     [ApiController]
     public class PurchaseController : ControllerBase
     {
+        private readonly string gmailEmailAddress = "thurzobence98@gmail.com";
+        private readonly string gmailEmailPassword = "uopd apeq etaa hihc";
         [HttpPost]
-        public ActionResult Post(CreatePurchaseDto createPurchaseDto)
+        public async Task<ActionResult> Post(CreatePurchaseDto createPurchaseDto)
         {
             if (!ModelState.IsValid)
             {
@@ -38,10 +42,8 @@ namespace Bakcend.Controllers
                 Tidid = createPurchaseDto.Tidid,
                 UserId = createPurchaseDto.UserId,
                 Date = createPurchaseDto.Date,
-                
             };
 
-            // Regisztráció manuális hozzáadása
             using (var context = new WebshopContext())
             {
                 if (purchase == null)
@@ -52,11 +54,46 @@ namespace Bakcend.Controllers
                 {
                     context.Add(purchase);
                     context.SaveChanges();
-                    return Ok(purchase);
+                    // Küldd el a megerősítő e-mailt a vásárlónak
+                    var emailSent = await SendOrdersEmail(purchase.Email);
+                    if (emailSent)
+                    {
+                        return Ok(purchase);
+                    }
+                    else
+                    {
+                        return StatusCode(500); // Internal Server Error, ha az e-mail küldése sikertelen
+                    }
                 }
-
             }
         }
+
+        private async Task<bool> SendOrdersEmail(string emailAddress)
+        {
+            try
+            {
+                using (var client = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    client.EnableSsl = true;
+                    client.Credentials = new NetworkCredential(gmailEmailAddress, gmailEmailPassword);
+
+                    var mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress(gmailEmailAddress);
+                    mailMessage.To.Add(emailAddress);
+                    mailMessage.Subject = "Sikeres rendelés";
+                    mailMessage.Body = "Kedves Felhasználó! Köszönjük a vásárlást, megrendelését elkezdtük összekészíteni. Megrendelésével kapcsolatos információkért elérhetőség: Tel.:+36/70 4212294 Email: thurzobence98@gmail.com";
+
+                    await client.SendMailAsync(mailMessage);
+                }
+
+                return true; // Az e-mail küldése sikeres volt
+            }
+            catch
+            {
+                return false; // Az e-mail küldése sikertelen volt
+            }
+        }
+
 
         [HttpPut("{Id}")]
         public ActionResult Put(int Id, UpdatePurchaseDto updatePurchaseDto)

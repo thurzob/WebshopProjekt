@@ -13,8 +13,7 @@ using Bakcend.Data;
 using Bakcend.Models;
 using Microsoft.AspNetCore.Identity;
 using Bakcend.Service;
-using System.Net.Mail;
-using System.Net;
+
 using System.Text;
 
 namespace Auth.Controllers
@@ -29,8 +28,8 @@ namespace Auth.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService authService;
-        private readonly string gmailEmailAddress = "thurzobence98@gmail.com"; // Gmail címed
-        private readonly string gmailEmailPassword = "uopd apeq etaa hihc"; // Gmail jelszavad
+        private readonly string gmailEmailAddress = "thurzobence98@gmail.com"; 
+        private readonly string gmailEmailPassword = "uopd apeq etaa hihc";
         
         public AuthController(IAuthService authService)
         {
@@ -195,12 +194,10 @@ namespace Auth.Controllers
                 // Új jelszó generálása
                 var newPassword = authService.GenerateRandomPassword();
 
-                // Jelszó frissítése az adatbázisban az új jelszóval
-                var hashedNewPassword = HashPassword(newPassword);
 
-                // Jelszó frissítése az adatbázisban az új jelszóval
-                var passwordUpdated = await authService.ResetPassword(passwordResetRequestDto.Email, hashedNewPassword);
-                if (!passwordUpdated)
+                // Jelszó frissítése az adatbázisban
+                var (success, generatedPassword ) = await authService.ResetPassword(passwordResetRequestDto.Email, newPassword);
+                if (!success)
                 {
                     return StatusCode(500, "Nem sikerült frissíteni az új jelszót az adatbázisban.");
                 }
@@ -215,21 +212,22 @@ namespace Auth.Controllers
                     mailMessage.From = new MailAddress(gmailEmailAddress);
                     mailMessage.To.Add(passwordResetRequestDto.Email);
                     mailMessage.Subject = "Jelszó visszaállítás";
-                    mailMessage.Body = "Az új jelszavad: " + newPassword;
+                    mailMessage.Body = "Az új jelszavad: " + generatedPassword;
 
                     client.Send(mailMessage);
                 }
 
-                return Ok(new { Message = "A jelszó sikeresen frissült és az új jelszó elküldve az email címre.", NewPassword = newPassword });
+                return Ok(200);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Hiba történt az új jelszó mentése és az email küldése közben: {ex.Message}");
+                return StatusCode(400, "Nem sikerült elküldeni az emailt");
             }
-
         }
 
-        
+
+
+
     }
 
 }

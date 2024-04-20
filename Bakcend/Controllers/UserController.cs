@@ -32,12 +32,8 @@ namespace Bakcend.Controllers
                 UserName = createUserDto.UserName,
                 Email = createUserDto.Email,
                 Age = createUserDto.Age,
-                PasswordHash = HashPassword(createUserDto.PasswordHash),              
                 PhoneNumber = createUserDto.PhoneNumber,
-                OrderStatus = createUserDto.OrderStatus,
-                
-
-
+                OrderStatus = createUserDto.OrderStatus // Hozzáadva az OrderStatus beállítása
             };
 
             using (var context = new WebshopContext())
@@ -273,13 +269,14 @@ namespace Bakcend.Controllers
 
                     if (updateUserDto.PhoneNumber != null)
                         existingUser.PhoneNumber = updateUserDto.PhoneNumber;
-                    
                     if (updateUserDto.PasswordHash != null)
                     {
-                        existingUser.PasswordHash = HashPassword(updateUserDto.PasswordHash);
+                        
+                        var passwordHasher = new PasswordHasher<Aspnetuser>();
+                        existingUser.PasswordHash = passwordHasher.HashPassword(existingUser, updateUserDto.PasswordHash);
                     }
 
-                    
+
 
                     using (var transaction = context.Database.BeginTransaction())
                     {

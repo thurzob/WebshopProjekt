@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SendGrid.Helpers.Mail;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Bakcend.Service
 {
@@ -99,12 +101,25 @@ namespace Bakcend.Service
 
         public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            var user = await appDbContext.applicationUsers.
-                FirstOrDefaultAsync(user => user.Email.ToLower() == loginRequestDto.Email.ToLower());
+            var user = await appDbContext.applicationUsers
+                .FirstOrDefaultAsync(user => user.Email.ToLower() == loginRequestDto.Email.ToLower());
 
-            bool isValid = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+            if (user == null)
+            {
+                return new LoginResponseDto() { Token = "Hibás Felhasználónév vagy jelszó!" };
+            }
 
-            if (user == null || isValid == false)
+            // Jelszó hash-elése a bejelentkezési kérésben megadott jelszónak
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
+            var hashedPassword = passwordHasher.HashPassword(user, loginRequestDto.Password);
+
+            // Az adatbázisban tárolt hashelt jelszó lekérése
+            var storedHashedPassword = user.PasswordHash;
+
+            // Jelszó hash-elt értékeinek összehasonlítása
+            bool isValidPassword = passwordHasher.VerifyHashedPassword(user, storedHashedPassword, loginRequestDto.Password) == PasswordVerificationResult.Success;
+
+            if (!isValidPassword)
             {
                 return new LoginResponseDto() { Token = "Hibás Felhasználónév vagy jelszó!" };
             }
@@ -120,8 +135,6 @@ namespace Bakcend.Service
             };
 
             return loginResponseDto;
-
-
         }
 
         public async Task<string> Register(RegisterRequestDto registerRequestDto)
@@ -172,57 +185,43 @@ namespace Bakcend.Service
 
         }
 
-        public async Task<bool> ResetPassword(string email, string newPassword)
+
+
+        public async Task<(bool, string)> ResetPassword(string email, string newPassword)
         {
-            var user = await appDbContext.applicationUsers.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
-
-            if (user != null)
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
             {
-                // Felhasználó jelszavának frissítése az új jelszóra
-                user.PasswordHash = newPassword;
-
-                // Az új jelszó beállítása a felhasználóhoz
-                var result = await userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return true;
-                }
+                // Felhasználó nem található az adott email címmel
+                return (false, null);
             }
 
-            return false;
+            // Jelszó generálása
+            string generatedPassword = GenerateRandomPassword();
+
+            // Jelszó hash-elése PBKDF2 algoritmussal
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
+            var passwordHash = passwordHasher.HashPassword(user, generatedPassword);
+
+            // Az új jelszó hash beállítása a felhasználóhoz
+            user.PasswordHash = passwordHash;
+
+            // Az új jelszó beállítása a felhasználóhoz
+            var result = await userManager.UpdateAsync(user);
+
+            return (result.Succeeded, generatedPassword);
         }
 
-        // Jelszó generálása
         public string GenerateRandomPassword()
         {
-            const string charsUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string charsLower = "abcdefghijklmnopqrstuvwxyz";
-            const string charsDigits = "0123456789";
-            const string charsSpecial = "!@#$%^&*()_+-=[]{}|;:,.<>?";
-
-            string[] charCategories = { charsUpper, charsLower, charsDigits, charsSpecial };
-
+            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder sb = new StringBuilder();
             Random random = new Random();
-
-            // Legalább egy karakter minden kategóriából
-            string password = new string(
-                Enumerable.Range(0, 4) // Négy karakter kategória
-                    .SelectMany(i => Enumerable.Repeat(charCategories[i], 1)) // Minden kategóriából egy karakter
-                    .Concat(Enumerable.Repeat(charsUpper + charsLower + charsDigits + charsSpecial, 4 - 1)) // További karakterek véletlenszerűen választva
-                    .Select(s => s[random.Next(s.Length)])
-                    .OrderBy(c => random.Next()) // Vegyes sorrend
-                    .ToArray()
-            );
-
-            // További véletlenszerű karakterek hozzáadása a minimum hosszúsághoz
-            while (password.Length < 12)
+            for (int i = 0; i < 12; i++)
             {
-                char randomChar = charCategories[random.Next(4)][random.Next(0, charCategories[random.Next(4)].Length)];
-                password += randomChar;
+                sb.Append(validChars[random.Next(validChars.Length)]);
             }
-
-            return password;
+            return sb.ToString();
         }
     }
 }
