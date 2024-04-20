@@ -1,3 +1,16 @@
+body {
+  background-image: url('../../public/Fokep.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* A háttérkép minimális magassága a teljes képernyő magassága */
+  padding-bottom: 20px; /* A tartalom alatti üres terület */
+}
+
+
+
+
+
 .navbar .dropdown-menu .dropdown-item:hover {
   background-color: rgb(15, 105, 83);
   right: 0;

@@ -287,15 +287,15 @@ const handleSendPasswordReset = async () => {
     <ResponsiveContainer>
           <ResponsiveRow className="justify-content-center" style={{ width: '50vh', margin: '0 auto', paddingTop: '100px' }}>
             <div className="login-form">
-              <h3 style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Bejelentkezés</h3>
+              <h3 style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'bisque' }}>Bejelentkezés</h3>
               <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicEmail" style={{ marginBottom: '30px' }}>
-                  <Form.Label style={{ marginBottom: '2rem' }}>Email cím</Form.Label>
+                  <Form.Label style={{ marginBottom: '2rem', color: 'bisque' }}>Email cím</Form.Label>
                   <Form.Control onChange={handleInputChange} value={formData.email} name="email" type="email" placeholder="Add meg az email címed" />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassword" style={{ marginBottom: '30px' }}>
-                  <Form.Label>Jelszó</Form.Label>
+                  <Form.Label style={{color: 'bisque'}}>Jelszó</Form.Label>
                   <Form.Control style={{ marginBottom: '2rem' }} onChange={handleInputChange} value={formData.password} name="password" type="password" placeholder="Jelszó" />
                   <Form.Text className="text-muted">
                   <FontAwesomeIcon
@@ -306,8 +306,8 @@ const handleSendPasswordReset = async () => {
                   </Form.Text>
                   {formError && <div style={{ color: 'red' }}>{formError}</div>}
                   {backendMessage && <div style={{ color: 'red' }}>{backendMessage}</div>}
-                  <Link onClick={handleForgotPasswordClick} to="#" style={{ marginRight: '200px' }}>Elfelejtette a jelszavát?</Link>
-                  <Link to="/Registration">Regisztráció</Link>
+                  <Link onClick={handleForgotPasswordClick} to="#" style={{ marginRight: '200px', color: 'bisque' }}>Elfelejtette a jelszavát?</Link>
+                  <Link style={{color: 'bisque'}} to="/Registration">Regisztráció</Link>
                   </Form.Group>
                   {showForgotPassword && (
                   <div>
@@ -325,12 +325,12 @@ const handleSendPasswordReset = async () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div>
-                    <button  style={{ backgroundColor: 'Green', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: '15px', marginTop: '15px' }}>Bejelentkezés</button>
+                    <button  style={{ backgroundColor: 'Green', color: 'bisque', width: ' 100%', height: '50px', borderRadius: '50px', marginBottom: '15px', marginTop: '15px' }}>Bejelentkezés</button>
                   </div>
                   
                   <div>
                     <Link to="/Home">
-                      <button style={{ backgroundColor: 'grey', color: 'white', width: ' 100%', height: '50px', borderRadius: '50px' }}>Vissza a főoldalra</button>
+                      <button style={{ backgroundColor: 'grey', color: 'bisque', width: ' 100%', height: '50px', borderRadius: '50px' }}>Vissza a főoldalra</button>
                     </Link>
                   </div>
                 </div>

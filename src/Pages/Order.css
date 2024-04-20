@@ -9,7 +9,9 @@
   }
   
   .order-form {
-    background-color: rgba(255, 255, 255, 0.4); /* átlátszó háttér */
+    background-image: url(../../public/leaves-8222919_640.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
     padding: 20px;
     border-radius: 50px;
     backdrop-filter: blur(10px); /* elhomályosítás */

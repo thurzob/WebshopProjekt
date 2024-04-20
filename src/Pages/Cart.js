@@ -143,6 +143,8 @@ function Cart() {
     const productImages = {
         productId1: 'https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg',
         productId2: 'https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg',
+        productId3: 'https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613603/rain_clik_1_of_1_rt2_jjkkoo.jpg',
+        productId4: 'https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613905/87793796_vngzku.jpg',
         // Egyéb termék azonosítók és URL-ek
     };
     

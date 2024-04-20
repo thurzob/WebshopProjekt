@@ -375,8 +375,8 @@ function Products() {
                         <Navbar.Collapse style={{marginLeft: '25px'}} id="basic-navbar-nav">
                         <Navbar.Brand style={{color:'bisque' ,fontSize: '17px'}} className="ml-2">Termékek:</Navbar.Brand>
                             <Nav className="mr-auto">
-                                <Nav.Link style={{color:'bisque'}} as={NavLink} to="" onClick={loadAllAutomatics}>Öntözőautomatikák</Nav.Link>
-                                <Nav.Link style={{color:'bisque'}} as={NavLink} to="">Öntözőalkatrészek</Nav.Link>
+                                <Nav.Link style={{color:'bisque'}} as={NavLink} to="" onClick={loadAllAutomatics}>Öntözőalkatrészek</Nav.Link>
+                                
                             </Nav>
                         </Navbar.Collapse>
                     </Navbar>
@@ -406,22 +406,82 @@ function Products() {
                             <div key={index}>
                                 <div style={{ marginRight: '20px', display: 'flex' }}>
                                     {selectedProductId === '1' && (
+                                        <div style={{display: 'flex'}}>
                                         <img  src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '250px' }} />
+                                        <p  style={{marginLeft: '15px'}}>
+                                        Évszakhoz igaztás: 0-150%-ig az öntözés időtartama 10% lépésekben könnyedén állítható az aktuális időjárásnak megfelelően
+                                        3 különböző program többszöri indítással, mely a legkülönbözőbb öntözési igényeket is kielégíti
+                                        Az öntözési napok szabadon választhatók ki, a hét bármely napjai, páros vagy páratlan napok, vagy maximum 31naponként ismétlődő ciklusok szerin
+                                        Szünetmentes memória: Hálózatkimaradás esetén tökéletes védelmet nyújt, megőrzi a pontos időt, napot és a programot.
+                                        Egyszerűen kezelhető: a forgókapcsolónak és a gomboknak köszönhetően
+                                        Távirányítható: ROAM-KIT segítségével a kert bármely pontjáról elindítható az öntözés
+                                        Automatikus vezérlés: a Solar-Sync funkciónak köszönhetően
+                                        Esőérzékelő: zónánként be-, illetve kikapcsolható
+                                        </p>  
+                                        </div>              
                                     )}
                                     {selectedProductId === '2' && (
+                                        <div style={{display: 'flex'}}>
                                         <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='X-CORE' style={{ width: '150%', maxWidth: '250px' }} />
+                                        <p  style={{marginLeft: '15px'}}>
+                                        Évszakhoz igaztás: 0-150%-ig az öntözés időtartama 10% lépésekben könnyedén állítható az aktuális időjárásnak megfelelően
+                                        3 különböző program többszöri indítással, mely a legkülönbözőbb öntözési igényeket is kielégíti
+                                        Az öntözési napok szabadon választhatók ki, a hét bármely napjai, páros vagy páratlan napok, vagy maximum 31naponként ismétlődő ciklusok szerin
+                                        Szünetmentes memória: Hálózatkimaradás esetén tökéletes védelmet nyújt, megőrzi a pontos időt, napot és a programot.
+                                        Egyszerűen kezelhető: a forgókapcsolónak és a gomboknak köszönhetően
+                                        Távirányítható: ROAM-KIT segítségével a kert bármely pontjáról elindítható az öntözés
+                                        Automatikus vezérlés: a Solar-Sync funkciónak köszönhetően
+                                        Esőérzékelő: zónánként be-, illetve kikapcsolható
+                                        </p>  
+                                        </div>  
                                     )}
+                                    {selectedProductId === '3' && (
+                                        <div style={{display: 'flex'}}>
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613603/rain_clik_1_of_1_rt2_jjkkoo.jpg' alt='Rain-Click' style={{ width: '150%', maxWidth: '250px' }} />
+                                        <p  style={{marginLeft: '15px'}}>
+                                        HUNTER RAIN-CLIK esőérzékelő (Quick Response™)
+                                        HUNTER RAIN-CLIK esőérzékelő feladata, hogy amikor elkezd esni az eső,
+                                        vagy pedig túl vagyunk egy komolyabb záporon, blokkolja az öntözőrendszert
+                                        a vezérlőn keresztül azáltal, hogy megszakítja az áramkört. Amint az érzékelőben
+                                        lévő szövetkorongok kiszáradnak, a mikrokapcsoló újra zár és ismét elindulhat az öntözés.
+                                        A RAIN-CLIK esőérzékelő csomagjában megtalálhatóak a felszereléshez szükséges rögzítőcsavarok.
+                                        Több esőérzékelőtől eltérően nem kell beállítani rajta a lezárást, mivel önmagát szabályozza.
+                                        </p>  
+                                        </div>  
+                                    )}
+                                    {selectedProductId === '4' && (
+                                        <div style={{display: 'flex'}}>
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613905/87793796_vngzku.jpg' alt='MP Rotator' style={{ width: '150%', maxWidth: '250px' }} />
+                                        <p  style={{marginLeft: '15px'}}>
+                                        A Hunter MP Rotátor fúvóka egy speciálisan forgó szórófej, amely az öntözni kívánt felületen 3 szintű vízsugaraival
+                                        biztosítja a számunkra oly fontos egyenletes lefedetséget. Működése közben impozáns látványt nyújtanak a forgó vízsugarak, 
+                                        amint járják táncukat üde zöld pázsitunk felett.
+                                        A Hunter ezen csúcsterméke nemcsak látványos működésével tűnik ki, hanem gazdaságos üzemeltetések is számos előnyt rejt,
+                                        mivel kis vízfogyasztású, ezért öntözőrendszerünket gazdaságosabban állíthatjuk össze, kevesebb zónával tervezhetünk és ezáltal
+                                        sok pénzt takaríthatunk meg. Akár azt is megtehetjük, hogy a régi elhasználódott vízpazarló vá vált spray zónáinkat, ezzel a fúvóka
+                                        családdal váltjuk ki, mivel a rotátor nagyrészt ugyanabban a tartományban dolgozik, mint a spray fejek. Sokszor azaz előny is társul
+                                        hozzá, hogy ásás és a szerelvények megbontása nélkül, pusztán a fúvókák cseréjével, az alacsonyabb vízfogyasztású, mégis jobb lefedetségű
+                                        öntözőrendszer elérhetővé válik. Azt teszi ezt lehetővé, hogy az MP Rotátor fúvóka több szórófejházzal is kompatibilis, azokba können
+                                        beszerelhető. Ma már kijelenthetük, hogy a házikertek öntözése elképzelhetetlen a rotátoros szórófejek használata nélkül.
+                                        A HUNTER Rotátor MP1000 2,5-4,6m, 90° - 210° típus kevesebb mint fele annyi vízmennyiségből képes megoldani az öntözést, mint a hagyományos
+                                        szórófej típusok. A Hunter Industries csúcstermékeinek számítanak ezek az öntözőrendszer alkatrészek, hiszen a legeffektívebb és legtakarékosabb
+                                        öntözést valósítják meg a kertünkben.
+                                       
+                                        </p>  
+                                        </div>  
+                                    )}
+                                    </div>
+                                    
+                                    <div style={{ overflow: 'hidden' }}>
+                                        <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>Termék típusa: {product.type}</p>
+                                        <p style={{ fontSize: '12px', marginBottom: '5px' }}>Széria név: {product.serialName}</p>
+                                        <p style={{ fontSize: '12px', marginBottom: '5px' }}>Ár: {product.price} Ft.</p>
+                                        <button onClick={decreaseQuantity}>-</button>
+                                        <span style={{ margin: '0 10px' }}>{quantity}</span>
+                                        <button onClick={increaseQuantity}>+</button>
+                                        <button onClick={() => handleAddToCart(quantity)}>Kosárba</button>
+                                    </div>
                                 </div>
-                                <div style={{ overflow: 'hidden' }}>
-                                    <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>Termék típusa: {product.type}</p>
-                                    <p style={{ fontSize: '12px', marginBottom: '5px' }}>Széria név: {product.serialName}</p>
-                                    <p style={{ fontSize: '12px', marginBottom: '5px' }}>Ár: {product.price} Ft.</p>
-                                    <button onClick={decreaseQuantity}>-</button>
-                                    <span style={{ margin: '0 10px' }}>{quantity}</span>
-                                    <button onClick={increaseQuantity}>+</button>
-                                    <button onClick={() => handleAddToCart(quantity)}>Kosárba</button>
-                                </div>
-                            </div>
                         ))}
                     </ProductContent>
                 )}
@@ -432,11 +492,68 @@ function Products() {
                             <div key={index}>
                                 <div style={{ marginRight: '20px', }}>
                                 {product.id == 1 && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px' }} />
-                                    )}
+                                        <div style={{display: 'flex'}}>
+                                             <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707668947/HunterNode_tn2cla.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px' }} />
+                                            <p  style={{marginLeft: '15px'}}>
+                                                Évszakhoz igaztás: 0-150%-ig az öntözés időtartama 10% lépésekben könnyedén állítható az aktuális időjárásnak megfelelően
+                                                3 különböző program többszöri indítással, mely a legkülönbözőbb öntözési igényeket is kielégíti
+                                                Az öntözési napok szabadon választhatók ki, a hét bármely napjai, páros vagy páratlan napok, vagy maximum 31naponként ismétlődő ciklusok szerin
+                                                Szünetmentes memória: Hálózatkimaradás esetén tökéletes védelmet nyújt, megőrzi a pontos időt, napot és a programot.
+                                                Egyszerűen kezelhető: a forgókapcsolónak és a gomboknak köszönhetően
+                                                Távirányítható: ROAM-KIT segítségével a kert bármely pontjáról elindítható az öntözés
+                                                Automatikus vezérlés: a Solar-Sync funkciónak köszönhetően
+                                                Esőérzékelő: zónánként be-, illetve kikapcsolható
+                                                </p>                                          
+                                        </div>
+                                    )}      
                                 {product.id == 2 && (
-                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px' }} />
+                                    <div style={{display: 'flex'}}>
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1707667618/HunterXcore_rwnbta.jpg' alt='NODE-BT' style={{ width: '150%', maxWidth: '300px'}} />
+                                        <p style={{marginLeft: '15px'}}>
+                                            A villamos hálózattól távol lévő, elszigetelt területek és csepegtető körök különleges igényei számára kínál a Hunter tökéletes,
+                                            gazdaságos megoldást. A NODE 400-at gyorsan és könnyen föl lehet szerelni egy szelep szolenoidjára, csavarok, fúrók vagy 
+                                            kábelbekötések nélkül. Az egység szilárd felépítése révén a szelepakna mostoha körülményei között is működik. 
+                                            A NODE 400 egy 9 V-os elemmel garantáltan egy teljes szezonon keresztül megbízhatóan üzemel. A kivételes megbízhatóságán 
+                                            kívül még programozni is gyerekjáték, a bonyolult nyomógombok és kapcsolók helyett a jól látható folyadékkristályos kijelző révén.
+                                            Kilenc indítási időpont lehetséges, így alkalmazkodik a friss vetésű gyep vagy a kis vízelnyelésű lejtők optimális öntözési ütemezéséhez.
+                                        </p>
+                                    </div>
                                     )}    
+                                {product.id === 3 && (
+                                        <div style={{display: 'flex'}}>
+                                        <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613603/rain_clik_1_of_1_rt2_jjkkoo.jpg' alt='Rain-Click' style={{ width: '150%', maxWidth: '250px' }} />
+                                        <p  style={{marginLeft: '15px'}}>
+                                        HUNTER RAIN-CLIK esőérzékelő (Quick Response™)
+                                        HUNTER RAIN-CLIK esőérzékelő feladata, hogy amikor elkezd esni az eső,
+                                        vagy pedig túl vagyunk egy komolyabb záporon, blokkolja az öntözőrendszert
+                                        a vezérlőn keresztül azáltal, hogy megszakítja az áramkört. Amint az érzékelőben
+                                        lévő szövetkorongok kiszáradnak, a mikrokapcsoló újra zár és ismét elindulhat az öntözés.
+                                        A RAIN-CLIK esőérzékelő csomagjában megtalálhatóak a felszereléshez szükséges rögzítőcsavarok.
+                                        Több esőérzékelőtől eltérően nem kell beállítani rajta a lezárást, mivel önmagát szabályozza.
+                                        </p>  
+                                        </div>  
+                                    )}
+                                    {product.id === 4 && (
+                                         <div style={{display: 'flex'}}>
+                                         <img src='https://res.cloudinary.com/dbmrgdyft/image/upload/v1713613905/87793796_vngzku.jpg' alt='MP Rotator' style={{ width: '150%', maxWidth: '250px' }} />
+                                         <p  style={{marginLeft: '15px'}}>
+                                         A Hunter MP Rotátor fúvóka egy speciálisan forgó szórófej, amely az öntözni kívánt felületen 3 szintű vízsugaraival
+                                         biztosítja a számunkra oly fontos egyenletes lefedetséget. Működése közben impozáns látványt nyújtanak a forgó vízsugarak, 
+                                         amint járják táncukat üde zöld pázsitunk felett.
+                                         A Hunter ezen csúcsterméke nemcsak látványos működésével tűnik ki, hanem gazdaságos üzemeltetések is számos előnyt rejt,
+                                         mivel kis vízfogyasztású, ezért öntözőrendszerünket gazdaságosabban állíthatjuk össze, kevesebb zónával tervezhetünk és ezáltal
+                                         sok pénzt takaríthatunk meg. Akár azt is megtehetjük, hogy a régi elhasználódott vízpazarló vá vált spray zónáinkat, ezzel a fúvóka
+                                         családdal váltjuk ki, mivel a rotátor nagyrészt ugyanabban a tartományban dolgozik, mint a spray fejek. Sokszor azaz előny is társul
+                                         hozzá, hogy ásás és a szerelvények megbontása nélkül, pusztán a fúvókák cseréjével, az alacsonyabb vízfogyasztású, mégis jobb lefedetségű
+                                         öntözőrendszer elérhetővé válik. Azt teszi ezt lehetővé, hogy az MP Rotátor fúvóka több szórófejházzal is kompatibilis, azokba können
+                                         beszerelhető. Ma már kijelenthetük, hogy a házikertek öntözése elképzelhetetlen a rotátoros szórófejek használata nélkül.
+                                         A HUNTER Rotátor MP1000 2,5-4,6m, 90° - 210° típus kevesebb mint fele annyi vízmennyiségből képes megoldani az öntözést, mint a hagyományos
+                                         szórófej típusok. A Hunter Industries csúcstermékeinek számítanak ezek az öntözőrendszer alkatrészek, hiszen a legeffektívebb és legtakarékosabb
+                                         öntözést valósítják meg a kertünkben.
+                                        
+                                         </p>  
+                                         </div>  
+                                    )}
                                     
                                 </div>
                                 <div style={{ overflow: 'hidden' }}>

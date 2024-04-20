@@ -291,36 +291,37 @@ function Order() {
             <ResponsiveContainer>
                 <ResponsiveRow className="justify-content-center" style={{minHeight: '50vh', width: '50vh', margin:'0 auto'}}>              
                     <div  className="order-form">                               
-                    <h2 style={{paddingTop: '5%', textDecoration: 'underline'}}>Rendelés</h2>
+                    <h2 style={{paddingTop: '5%', textDecoration: 'underline', color: 'bisque'}}>Rendelés</h2>
                     <ResponsiveForm onSubmit={handleOrder}>
                     <Form.Group   controlId="formBasicBillingName" style={{marginBottom: '30px'}}>
-                    <Form.Label style={{marginBottom: '10px'}}>Számlázási név</Form.Label>
+                    <Form.Label style={{marginBottom: '10px', color: 'bisque'}}>Számlázási név</Form.Label>
                     <Form.Control name='billingName' style={{}} type="text" placeholder="Add meg a számlázási nevet" />
                     </Form.Group>
-                    <Form.Label>Számlázási cím</Form.Label>
+                    <Form.Label style={{color: 'bisque'}}>Számlázási cím</Form.Label>
                     <Form.Group controlId="formBasicBillingPostalCode" style={{marginBottom: '30px', display: 'flex'}}>
                     <Form.Control name='billingPostalCode' style={{marginRight : '2%', width: '60px'}} type="text" placeholder="Irányítószám"/>
                     <Form.Control name='billingAddress' style={{}} type="text" placeholder="Add meg a számlázási címet"/>
                     </Form.Group>
 
                     <Form.Group controlId="formBasicBillingEmail" style={{marginBottom: '30px'}}>
-                    <Form.Label>Email cím</Form.Label>
+                    <Form.Label style={{color: 'bisque'}}>Email cím</Form.Label>
                     <Form.Control name='email' style={{}} type="email" placeholder="Add meg az email címed"/>
                     </Form.Group>
 
-                    <Form.Label>Szállítási cím</Form.Label>
+                    <Form.Label style={{color: 'bisque'}}>Szállítási cím</Form.Label>
                     <Form.Group controlId="formBasicAddress" style={{marginBottom: '30px', display: 'flex'}}>                  
                     <Form.Control name='postalCode' style={{marginRight : '2%', width: '60px'}} type="text" placeholder="Irányítószám"/>
                     <Form.Control name='deliveryAddress' style={{}} type="text" placeholder="Add meg a szállítási cím"/>
                     </Form.Group>
 
                     <Form.Group controlId="formBasicBillingPhoneNumber" style={{marginBottom: '30px'}}>
-                    <Form.Label>Telefonszám</Form.Label>
+                    <Form.Label style={{color: 'bisque'}}>Telefonszám</Form.Label>
                     <Form.Control name='phoneNumber' style={{}} type="tel" placeholder="Add meg a telefonszámot"/>
                     </Form.Group>
 
                     <button  
                     style={{
+                      color: 'bisque',
                       width: '100%',
                       backgroundColor: 'Green',
                       color: 'white',
@@ -334,6 +335,7 @@ function Order() {
                     <Link to="/Home">
                       <button
                         style={{
+                          color: 'bisque',
                           width: '100%',
                           backgroundColor: 'grey',
                           color: 'white',   
@@ -351,6 +353,7 @@ function Order() {
                     <Link to="/Cart">
                       <button
                         style={{
+                          color: 'bisque',
                           width: '100%',
                           backgroundColor: 'black',
                           color: 'white',                         

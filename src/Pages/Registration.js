@@ -259,26 +259,26 @@ function Registration()
           <ResponsiveRow className="justify-content-center" style={{ width: '50vh', margin: '0 auto', paddingTop: '83px' }}>
             <div className="registration-form">
               
-              <h3 style={{ textDecoration: 'underline', fontWeight: 'bold' }}>Regisztráció</h3>
+              <h3 style={{ textDecoration: 'underline', fontWeight: 'bold', color: 'bisque' }}>Regisztráció</h3>
 
               <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicUserName" style={{ marginBottom: '5px' }}>
-                  <Form.Label style={{ marginBottom: '10px' }}>Felhasználónév</Form.Label>
+                  <Form.Label style={{ marginBottom: '10px', color: 'bisque' }}>Felhasználónév</Form.Label>
                   <Form.Control  onChange={handleInputChange} name='username' value={formData.username} type="text" placeholder="Felhasználónév" />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicFullName" style={{ marginBottom: '5px' }}>
-                  <Form.Label style={{ marginBottom: '10px' }}>Teljes név</Form.Label>
+                  <Form.Label style={{ marginBottom: '10px', color: 'bisque' }}>Teljes név</Form.Label>
                   <Form.Control  onChange={handleInputChange} name='fullname' value={formData.fullname} type="text" placeholder="Teljes név" />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicEmail" style={{ marginBottom: '5px' }}>
-                  <Form.Label style={{ marginBottom: '5px' }}>Email</Form.Label>
+                  <Form.Label style={{ marginBottom: '5px', color: 'bisque' }}>Email</Form.Label>
                   <Form.Control  onChange={handleInputChange} name='email' value={formData.email} type="email" placeholder="Email cím" />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassword" style={{ marginBottom: '5px' }}>
-                  <Form.Label>Jelszó</Form.Label>
+                  <Form.Label style={{color: 'bisque'}}>Jelszó</Form.Label>
                   <Form.Control
                     name='password'
                     type="password"
@@ -298,7 +298,7 @@ function Registration()
                 </Form.Group>
 
                 <Form.Group controlId="formBasicConfirmPassword" style={{ marginBottom: '10px' }}>
-                <Form.Label>Jelszó újra</Form.Label>
+                <Form.Label style={{color: 'bisque'}}>Jelszó újra</Form.Label>
                   <Form.Control
                     name='confirmPassword'
                     type="password"
@@ -317,7 +317,7 @@ function Registration()
                 </Form.Group>
 
                 <Form.Group controlId="formBasicnumber" style={{ marginBottom: '10px' }}>
-                <Form.Label>Add meg a telefonszámod</Form.Label>
+                <Form.Label style={{color: 'bisque'}}>Add meg a telefonszámod</Form.Label>
                 <div style={{ display: 'flex' }}>
                   <div style={{textAlign: 'center', marginRight: '5px', padding: '5px', backgroundColor: 'white', borderRadius: '5px', height: '38px' }}>+36</div>
                   <Form.Control
@@ -332,7 +332,7 @@ function Registration()
                 </Form.Group>
 
                 <Form.Group controlId="formBasicAge" style={{ marginBottom: '10px'  }}>
-                  <Form.Label style={{ marginBottom: '10px' }}>Kor</Form.Label>
+                  <Form.Label style={{ marginBottom: '10px', color: 'bisque' }}>Kor</Form.Label>
                   <Form.Control style={{width: '50px', marginRight: '15px', padding: '5px', backgroundColor: 'white', borderRadius: '5px', height: '38px' }}  onChange={handleInputChange} name='age' value={formData.age} type="text" placeholder="Kor" />
                 </Form.Group>
 
@@ -342,8 +342,9 @@ function Registration()
                       <button
                       type='submit'
                         style={{
+
                           backgroundColor: 'blue',
-                          color: 'white',
+                          color: 'bisque',
                           width: ' 100%',
                           height: '50px',
                           borderRadius: '50px',
@@ -361,7 +362,7 @@ function Registration()
                       <button
                         style={{
                           backgroundColor: 'grey',
-                          color: 'white',
+                          color: 'bisque',
                           width: ' 100%',
                           height: '50px',
                           borderRadius: '50px',
