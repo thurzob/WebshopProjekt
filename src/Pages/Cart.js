@@ -278,7 +278,7 @@ function Cart() {
                             <Nav.Link style={{color: 'bisque'}} as={Link} to='/Products'>
                             Termékek
                             </Nav.Link>  
-                            <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
+                                
                             <NavbarBrand style={{color: 'bisque'}}  as={Link} to='/Cart'>
                             Kosár
                             </NavbarBrand>

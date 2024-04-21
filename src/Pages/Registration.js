@@ -225,7 +225,7 @@ function Registration()
             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Products'>
               Termékek
             </Nav.Link>
-            <Nav.Link style={{color: 'bisque'}}  href='#'>Kapcsolat</Nav.Link>      
+               
             <Nav.Link style={{color: 'bisque'}}  as={Link} to='/Cart'>
               Kosár
             </Nav.Link>
