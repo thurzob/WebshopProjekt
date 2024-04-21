@@ -631,7 +631,7 @@ function Admin()
             type='button'
             className='btn btn-success filter-button'
             onClick={handlePutOrderStatus}>
-            Státusz módosítása
+            Módosítás
           </button>
         </div>   
         
